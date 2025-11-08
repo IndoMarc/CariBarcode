@@ -7,12 +7,109 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <style>
         :root {
             font-family: 'Inter', sans-serif;
         }
         
+        #matrix-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: block;
+            background: #000; 
+            z-index: 0;
+        }
+
+        body {
+            background-color: #000; 
+        }
+        
+        #main-container, footer {
+            z-index: 10;
+            position: relative;
+        }
+        
+        .header-title {
+            background-image: linear-gradient(to right, #ffffff, #e0e0e0); 
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.9); 
+        }
+
+        .glass-effect {
+            background-color: rgba(255, 255, 255, 0.05); 
+            backdrop-filter: blur(12px); 
+            border: 1px solid rgba(255, 255, 255, 0.15); 
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4); 
+            transition: all 0.3s ease-in-out;
+        }
+        
+        .glass-input {
+            background-color: rgba(0, 0, 0, 0.4); 
+        }
+
+        .glass-button-base {
+            backdrop-filter: blur(5px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+            transition: all 0.2s ease-in-out;
+            border-width: 1px; 
+            color: #fff; 
+            font-weight: 600; 
+        }
+        
+        .glass-emerald {
+            background-color: rgba(16, 185, 129, 0.3); 
+            border-color: rgba(16, 185, 129, 0.6);
+        }
+        .glass-emerald:hover {
+            background-color: rgba(16, 185, 129, 0.5); 
+        }
+
+        .glass-gray {
+            background-color: rgba(107, 114, 128, 0.3); 
+            border-color: rgba(107, 114, 128, 0.6);
+        }
+        .glass-gray:hover {
+            background-color: rgba(107, 114, 128, 0.5); 
+        }
+
+        .glass-circle {
+             backdrop-filter: blur(5px);
+             background-color: rgba(255, 255, 255, 0.25); 
+             border: 1px solid rgba(255, 255, 255, 0.4); 
+             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+             color: #ffffff; 
+        }
+        .glass-circle:hover:not(:disabled) {
+             background-color: rgba(255, 255, 255, 0.4); 
+        }
+
+        .swal2-popup.glass-swal {
+            background-color: rgba(255, 255, 255, 0.1); 
+            backdrop-filter: blur(8px); 
+            border: 1px solid rgba(255, 255, 255, 0.2); 
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5); 
+            color: #ffffff; 
+        }
+        
+        .swal2-popup.glass-swal .swal2-title {
+            color: #ffffff; 
+        }
+        
+        .swal2-popup.glass-swal .swal2-content {
+             color: #e0e0e0; 
+        }
+        
+        .swal2-popup.glass-swal .swal2-close {
+            color: #ffffff;
+        }
+
         .property-key {
             font-weight: 500; 
             color: #4b5563; 
@@ -32,14 +129,6 @@
             animation: fadeInOut 3s ease-in-out forwards;
         }
 
-        .header-title {
-            background-image: linear-gradient(to right, #065f46, #10b981); 
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.4); 
-        }
-
         .modal-overlay {
             background-color: rgba(0, 0, 0, 0.7); 
             backdrop-filter: blur(5px);
@@ -51,7 +140,11 @@
             transform: scale(0.95) translateY(20px);
             opacity: 0;
             max-width: 95vw; 
-            background-color: #ffffff; 
+            
+            background-color: rgba(255, 255, 255, 0.1); 
+            backdrop-filter: blur(20px); 
+            border: 1px solid rgba(255, 255, 255, 0.5); 
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3); 
         }
         .modal-show .modal-content {
             transform: scale(1) translateY(0);
@@ -62,6 +155,51 @@
              max-height: 70vh; 
              overflow-y: auto; 
              padding: 1rem; 
+        }
+        
+        .modal-content h3 {
+            color: #fff; 
+        }
+        .modal-content .property-key {
+            color: #d1d5db; 
+        }
+        .modal-content .text-gray-700 {
+            color: #f3f4f6; 
+        }
+        .modal-content .text-gray-600 {
+             color: #e5e7eb; 
+        }
+        .modal-content .text-red-400 {
+            color: #f87171 !important; 
+        }
+        
+        .barcode-section {
+            background-color: #ffffff; 
+            border: 2px solid rgba(0, 0, 0, 0.1); 
+        }
+        .barcode-section h4 {
+            color: #1f2937; 
+        }
+        .barcode-section .border-t {
+            border-color: rgba(0, 0, 0, 0.1) !important;
+        }
+
+        .modal-footer {
+            background-color: rgba(255, 255, 255, 0.05); 
+            border-top: 1px solid rgba(255, 255, 255, 0.2); 
+        }
+        .modal-footer p, .modal-footer .text-gray-700 {
+            color: #f3f4f6; 
+        }
+        
+        .modal-content .border-gray-300 {
+            border-color: rgba(255, 255, 255, 0.2) !important;
+        }
+        .modal-content .border-gray-200 {
+            border-color: rgba(255, 255, 255, 0.15) !important;
+        }
+        .modal-content .border-red-500 {
+            border-color: #f87171 !important; 
         }
         
         .content-transition {
@@ -85,15 +223,18 @@
         }
     </style>
 </head>
-<body class="bg-gray-800 min-h-screen flex flex-col items-center">
-    <div id="main-container" class="w-full max-w-xl lg:max-w-3xl p-4 sm:p-6 flex-grow"> 
+<body class="min-h-screen flex flex-col items-center">
+    
+    <canvas id="matrix-canvas"></canvas>
+
+    <div id="main-container" class="w-full max-w-xl lg:max-w-3xl p-4 sm:p-6 flex-grow z-10 relative"> 
         <header class="text-center py-6 md:py-8 mb-4"> 
             <h1 class="header-title text-4xl sm:text-5xl font-extrabold tracking-tight">
              CARI BARCODE & SCAN ITT WDCP
             </h1>
         </header>
 
-        <div class="bg-gray-900 p-4 sm:p-6 shadow-xl rounded-2xl mb-4 flex flex-col space-y-3 border border-gray-700">
+        <div class="glass-effect p-4 sm:p-6 rounded-2xl mb-4 flex flex-col space-y-3">
             <div class="relative flex-grow">
                 <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-500 z-10"></i>
                 
@@ -101,43 +242,34 @@
                     id="search-input" 
                     type="text" 
                     placeholder="Masukkan PLU, Nama, atau Barcode..."
-                    class="w-full p-3 pl-10 pr-4 border-2 border-gray-700 rounded-xl bg-gray-800 text-gray-100 placeholder-gray-500 focus:border-emerald-500 focus:ring-1 outline-none transition duration-150 font-medium"
+                    class="w-full p-3 pl-10 pr-4 border-2 border-gray-700 rounded-xl glass-input text-gray-100 placeholder-gray-500 focus:border-emerald-500 focus:ring-1 outline-none transition duration-150 font-medium"
                     >
             </div>
-            
-            <button 
-                id="itt-menu-button" 
-                onclick="toggleIttFilters()"
-                class="w-full bg-amber-500 hover:bg-amber-600 text-white font-semibold py-3 px-4 rounded-xl shadow-md transition duration-200 ease-in-out transform hover:scale-[1.005] active:scale-[0.99] focus:ring-4 focus:ring-amber-300 focus:ring-offset-2 flex items-center justify-center space-x-2"
-                >
-                <i data-lucide="filter" class="h-5 w-5"></i>
-                <span id="itt-button-text">Tampilkan Menu ITT WDCP</span>
-            </button>
         </div>
 
-        <div id="itt-filters" class="hidden bg-gray-900 p-4 sm:p-6 shadow-xl rounded-2xl mb-4 border border-amber-700">
+        <div id="itt-filters" class="glass-effect p-4 sm:p-6 rounded-2xl mb-4 border border-amber-700">
             <h4 class="text-lg font-bold text-gray-100 mb-4 flex items-center space-x-2 border-b pb-2 border-amber-900">
                  <i data-lucide="list-filter" class="h-5 w-5 text-amber-500"></i>
-                 <span>Filter ITT WDCP</span>
+                 <span>Filter Scan ITT WDCP / PDA</span>
             </h4>
             <div class="grid grid-cols-1 gap-4 md:grid-cols-3"> 
                 <div>
                     <label for="filter-modis" class="block text-sm font-medium text-gray-300 mb-1">Pilih Modis</label>
-                    <select id="filter-modis" class="w-full p-3 border-2 border-gray-700 rounded-xl bg-gray-800 text-gray-100 focus:border-emerald-500 focus:ring-1 outline-none transition duration-150">
+                    <select id="filter-modis" class="w-full p-3 border-2 border-gray-700 rounded-xl glass-input text-gray-100 focus:border-emerald-500 focus:ring-1 outline-none transition duration-150">
                         <option value="">-- Semua Modis --</option>
                     </select>
                 </div>
                 
                 <div>
                     <label for="filter-shelf-start" class="block text-sm font-medium text-gray-300 mb-1">Shelf Dari</label>
-                    <select id="filter-shelf-start" class="w-full p-3 border-2 border-gray-700 rounded-xl bg-gray-800 text-gray-100 focus:border-emerald-500 focus:ring-1 outline-none transition duration-150">
+                    <select id="filter-shelf-start" class="w-full p-3 border-2 border-gray-700 rounded-xl glass-input text-gray-100 focus:border-emerald-500 focus:ring-1 outline-none transition duration-150">
                         <option value="">-- Pilih Shelf Awal --</option>
                     </select>
                 </div>
                 
                 <div>
                     <label for="filter-shelf-end" class="block text-sm font-medium text-gray-300 mb-1">Shelf Sampai</label>
-                    <select id="filter-shelf-end" class="w-full p-3 border-2 border-gray-700 rounded-xl bg-gray-800 text-gray-100 focus:border-emerald-500 focus:ring-1 outline-none transition duration-150">
+                    <select id="filter-shelf-end" class="w-full p-3 border-2 border-gray-700 rounded-xl glass-input text-gray-100 focus:border-emerald-500 focus:ring-1 outline-none transition duration-150">
                         <option value="">-- Pilih Shelf Akhir --</option>
                     </select>
                 </div>
@@ -148,7 +280,7 @@
              <button 
                 id="search-button" 
                 onclick="handleSearch()"
-                class="w-1/2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 px-8 rounded-xl shadow-lg transition duration-200 ease-in-out transform hover:scale-[1.005] active:scale-[0.99] focus:ring-4 focus:ring-emerald-300 focus:ring-offset-2 flex items-center justify-center space-x-2"
+                class="w-1/2 glass-button-base glass-emerald py-3 px-8 rounded-xl shadow-lg transition duration-200 ease-in-out transform hover:scale-[1.005] active:scale-[0.99] focus:ring-4 focus:ring-emerald-300 focus:ring-offset-2 flex items-center justify-center space-x-2"
                 >
                 <i data-lucide="scan-line" class="h-5 w-5"></i>
                 <span>CARI DATA</span>
@@ -157,75 +289,37 @@
              <button 
                 id="reset-button" 
                 onclick="resetAll()"
-                class="w-1/2 bg-gray-600 hover:bg-gray-700 text-white font-semibold py-3 px-8 rounded-xl shadow-lg transition duration-200 ease-in-out transform hover:scale-[1.005] active:scale-[0.99] focus:ring-4 focus:ring-gray-300 focus:ring-offset-2 flex items-center justify-center space-x-2"
+                class="w-1/2 glass-button-base glass-gray py-3 px-8 rounded-xl shadow-lg transition duration-200 ease-in-out transform hover:scale-[1.005] active:scale-[0.99] focus:ring-4 focus:ring-gray-300 focus:ring-offset-2 flex items-center justify-center space-x-2"
                 >
                 <i data-lucide="rotate-ccw" class="h-5 w-5"></i>
                 <span>RESET</span>
             </button>
         </div>
         
-        <div id="search-feedback-message" 
-             class="hidden mx-auto max-w-full text-center bg-amber-900/20 text-amber-300 font-semibold py-3 px-6 rounded-xl shadow-md border border-amber-700 mb-6 transition duration-300 ease-in-out">
-            <i data-lucide="alert-triangle" class="inline-block h-5 w-5 mr-2 align-text-bottom"></i>
-            Harap masukkan kata kunci atau pilih filter untuk mencari.
-        </div>
-        
-        <div id="data-status-area">
-            <div id="loading" class="text-center p-12 sm:p-16 text-gray-400 bg-gray-900 shadow-xl rounded-xl border-t-4 border-emerald-500">
-                <svg class="animate-spin h-10 w-10 text-emerald-600 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                <p class="mt-4 text-xl font-semibold text-gray-200">Memuat data...</p>
-            </div>
-            
-            <div id="initial-message" class="text-center max-w-full mx-auto p-8 sm:p-10 bg-gray-900 shadow-xl rounded-2xl border-t-8 border-emerald-500 hidden">
-                <i data-lucide="package-search" class="h-12 w-12 text-emerald-500 mx-auto mb-4"></i>
-                <h3 class="text-xl sm:text-2xl font-bold text-gray-100">Data Berhasil Dimuat !</h3>
-            </div>
-
-            <div id="error-message" class="hidden bg-red-900/20 border-l-4 border-red-500 text-red-300 p-4 sm:p-6 rounded-lg relative shadow-md mt-6">
-                <div class="flex items-center">
-                    <i data-lucide="skull" class="h-6 w-6 mr-3"></i>
-                    <div>
-                        <strong class="font-bold">Gagal memuat data !</strong>
-                        <span class="block text-sm sm:inline" id="error-text"></span>
-                    </div>
-                </div>
-            </div>
-            
-            <div id="no-results" class="hidden text-center p-12 sm:p-16 text-gray-400 bg-gray-900 shadow-xl rounded-xl border-t-4 border-red-500 mt-6">
-                <i data-lucide="ghost" class="h-14 w-14 text-red-400 mx-auto mb-4"></i>
-                <p class="text-2xl sm:text-3xl font-bold text-gray-100">Tidak Ada Hasil Ditemukan</p>
-                <p class="mt-2 text-gray-400">Coba periksa kata kunci atau filter ..</p>
-            </div>
-        </div>
     </div> 
     
     <div id="result-modal" class="modal-overlay hidden fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
         
-        <div class="modal-content bg-white w-full max-w-sm md:max-w-md rounded-2xl shadow-3xl relative" onclick="event.stopPropagation()">
+        <div class="modal-content w-full max-w-sm md:max-w-md rounded-2xl shadow-3xl relative" onclick="event.stopPropagation()">
             
             <div class="modal-content-container p-4 sm:p-6">
                 <div id="modal-card-content" class="content-transition content-active">
                 </div>
             </div>
 
-            <div class="p-3 sm:p-4 bg-gray-100 border-t border-gray-300 flex flex-col sm:flex-row justify-between items-center rounded-b-2xl">
+            <div class="modal-footer p-3 sm:p-4 border-t flex flex-col sm:flex-row justify-between items-center rounded-b-2xl">
                 
                 <div id="modal-navigation" class="flex items-center justify-center sm:justify-start w-full sm:w-auto mb-3 sm:mb-0">
                     <button id="prev-button" onclick="navigateResult(-1)" 
-                            class="hidden p-2 text-gray-700 bg-white border border-gray-300 rounded-full hover:bg-gray-100 transition duration-150 shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed">
-                         <i data-lucide="chevron-left" class="h-5 w-5"></i>
-                    </button>
+                            class="hidden p-2 glass-circle rounded-full transition duration-150 focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed">
+                         <i data-lucide="chevron-left" class="h-5 w-5 text-gray-800"></i> </button>
                     
-                    <p id="nav-status" class="text-sm font-semibold text-gray-700 mx-3 sm:mx-4 hidden">
+                    <p id="nav-status" class="text-sm font-semibold mx-3 sm:mx-4 text-gray-700 hidden">
                     </p>
                     
                     <button id="next-button" onclick="navigateResult(1)" 
-                            class="hidden p-2 text-gray-700 bg-white border border-gray-300 rounded-full hover:bg-gray-100 transition duration-150 shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed">
-                         <i data-lucide="chevron-right" class="h-5 w-5"></i>
-                    </button>
+                            class="hidden p-2 glass-circle rounded-full transition duration-150 focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed">
+                         <i data-lucide="chevron-right" class="h-5 w-5 text-gray-800"></i> </button>
                 </div>
                 
                 <button onclick="closeModal()" 
@@ -237,7 +331,7 @@
         </div>
     </div>
     
-    <footer class="w-full bg-gray-900 text-center text-gray-400 text-xs sm:text-sm font-medium px-4 sm:px-8 py-3 border-t border-gray-700 mt-auto">
+    <footer class="w-full glass-effect text-center text-gray-400 text-xs sm:text-sm font-medium px-4 sm:px-8 py-3 mt-auto z-10 relative">
         ~ Made With 🖤 by M.H.R ~
         <div id="timestamp" class="text-xs text-gray-500 mt-1 font-normal"></div>
     </footer>
@@ -248,13 +342,7 @@
         let currentResults = []; 
         let currentIndex = 0;    
         
-        const loadingDiv = document.getElementById('loading');
-        const errorDiv = document.getElementById('error-message');
-        const errorTextSpan = document.getElementById('error-text');
         const searchInput = document.getElementById('search-input');
-        const noResultsDiv = document.getElementById('no-results');
-        const initialMessageDiv = document.getElementById('initial-message');
-        const feedbackMessageDiv = document.getElementById('search-feedback-message');
         const resultModalDiv = document.getElementById('result-modal'); 
         const modalCardContentDiv = document.getElementById('modal-card-content');
         const prevButton = document.getElementById('prev-button');
@@ -265,13 +353,73 @@
         const filterModis = document.getElementById('filter-modis');
         const filterShelfStart = document.getElementById('filter-shelf-start');
         const filterShelfEnd = document.getElementById('filter-shelf-end');
-        const ittButtonText = document.getElementById('itt-button-text');
         
-        const mainContainerDiv = document.getElementById('main-container');
         const timestampDiv = document.getElementById('timestamp');
+
+        const canvas = document.getElementById('matrix-canvas');
+        const ctx = canvas.getContext('2d');
+
+        let width = canvas.width = window.innerWidth;
+        let height = canvas.height = window.innerHeight;
+
+        const characters = 'アァカサタナハマヤラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユルグズブプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨロヲゴゾドボポヴッン0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+        
+        const font_size = 14; 
+        let columns = Math.floor(width / font_size);
+        const drops = [];
+
+        for (let i = 0; i < columns; i++) {
+            drops[i] = 1; 
+        }
+
+        function drawMatrix() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.04)'; 
+            ctx.fillRect(0, 0, width, height);
+
+            ctx.fillStyle = '#0C6'; 
+            ctx.font = font_size + 'px monospace';
+
+            for (let i = 0; i < drops.length; i++) {
+                const text = characters[Math.floor(Math.random() * characters.length)];
+                
+                const x = i * font_size;
+                const y = drops[i] * font_size;
+                ctx.fillText(text, x, y);
+
+                if (drops[i] * font_size > height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+
+                drops[i]++;
+            }
+        }
+        
+        window.addEventListener('resize', () => {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            columns = Math.floor(width / font_size);
+            drops.length = columns; 
+            for (let i = 0; i < columns; i++) {
+                if (drops[i] === undefined) {
+                    drops[i] = 1;
+                }
+            }
+        });
+
+        let interval = setInterval(drawMatrix, 50); 
+
 
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
+            
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            columns = Math.floor(width / font_size);
+            if(drops.length < columns) {
+                for (let i = drops.length; i < columns; i++) {
+                   drops[i] = 1; 
+                }
+            }
             
             setInterval(updateTimestamp, 1000);
             updateTimestamp();
@@ -290,6 +438,59 @@
             
             fetchAndInitializeData();
         });
+
+        function getSwalMixin(isToast = false) {
+             const baseConfig = {
+                customClass: {
+                    popup: 'glass-swal' 
+                },
+                buttonsStyling: false, 
+                confirmButtonClass: 'glass-button-base glass-emerald py-2 px-4 rounded-xl shadow-md transition duration-150',
+                cancelButtonClass: 'glass-button-base glass-gray py-2 px-4 rounded-xl shadow-md transition duration-150',
+                showClass: {
+                    popup: 'animate__animated animate__fadeInDown'
+                },
+                hideClass: {
+                    popup: 'animate__animated animate__fadeOutUp'
+                }
+            };
+
+            if (isToast) {
+                return Swal.mixin({
+                    ...baseConfig,
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 1000, 
+                    timerProgressBar: true,
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer)
+                        toast.addEventListener('mouseleave', Swal.resumeTimer)
+                    }
+                });
+            } else {
+                return baseConfig;
+            }
+        }
+
+        function showSwal(icon, title, text) {
+            Swal.fire({
+                ...getSwalMixin(false),
+                icon: icon,
+                title: title,
+                text: text,
+                confirmButtonText: 'Tutup'
+            });
+        }
+        
+        function showSwalToast(icon, title) {
+            const Toast = getSwalMixin(true);
+
+            Toast.fire({
+                icon: icon,
+                title: title
+            });
+        }
 
         function updateTimestamp() {
             const now = new Date();
@@ -320,31 +521,12 @@
             filterShelfEnd.value = '';
 
             clearDisplayAndFocus();
-            noResultsDiv.classList.add('hidden');
-            initialMessageDiv.classList.remove('hidden');
-            errorDiv.classList.add('hidden');
+            
+            showSwalToast('info', 'Input dan Filter berhasil di-RESET!');
             
             searchInput.focus();
-
-            if (!ittFiltersDiv.classList.contains('hidden')) {
-                toggleIttFilters();
-            }
         }
 
-        function toggleIttFilters() {
-            const isHidden = ittFiltersDiv.classList.toggle('hidden');
-            
-            if (isHidden) {
-                ittButtonText.textContent = 'Tampilkan Menu ITT WDCP';
-                document.getElementById('itt-menu-button').classList.remove('bg-amber-600', 'ring-offset-2');
-                document.getElementById('itt-menu-button').classList.add('bg-amber-500');
-            } else {
-                ittButtonText.textContent = 'Sembunyikan Menu ITT WDCP';
-                document.getElementById('itt-menu-button').classList.remove('bg-amber-500');
-                document.getElementById('itt-menu-button').classList.add('bg-amber-600', 'ring-offset-2');
-            }
-        }
-        
         function populateIttFilters() {
             if (!globalData || globalData.length === 0) {
                  return;
@@ -398,8 +580,6 @@
 
         function clearDisplayAndFocus() {
             instantCloseModal();
-            noResultsDiv.classList.add('hidden');
-            initialMessageDiv.classList.add('hidden');
             searchInput.focus();
         }
 
@@ -420,11 +600,8 @@
         function displayResultsInModal(items) {
             currentResults = items;
             
-            noResultsDiv.classList.add('hidden');
-            initialMessageDiv.classList.add('hidden'); 
-            
             if (items.length === 0) {
-                noResultsDiv.classList.remove('hidden');
+                showSwal('info', 'Tidak Ada Hasil Ditemukan', 'Coba periksa kata kunci atau filter ..');
                 instantCloseModal();
                 return;
             }
@@ -453,6 +630,13 @@
                 
                 return 0; 
             });
+            
+            if (currentResults.length === 1) {
+                 showSwalToast('success', '1 Data ditemukan!');
+            } else {
+                 showSwalToast('success', `${currentResults.length} Data ditemukan!`);
+            }
+
 
             currentIndex = 0;
             updateModalContent(0);
@@ -539,7 +723,7 @@
             
             const headerHtml = `
                 <div class="text-center mb-4 pb-2 border-b border-gray-300"> 
-                    <h3 class="text-xl font-extrabold text-gray-800">${productTitle}</h3> 
+                    <h3 class="text-xl font-extrabold">${productTitle}</h3> 
                 </div>
             `;
             
@@ -567,8 +751,8 @@
                     }
                     
                     if (barcodeValues.length > 0) {
-                        let currentBarcodeHtml = `<div class="mb-4 p-4 bg-gray-100 rounded-xl border-2 border-gray-300 shadow-inner text-center"> 
-                            <h4 class="text-xl font-bold text-gray-800 mb-2">${pluValue}</h4> `; 
+                        let currentBarcodeHtml = `<div class="mb-4 p-4 barcode-section rounded-xl shadow-md text-center"> 
+                            <h4 class="text-xl font-bold mb-2">${pluValue}</h4> `; 
                         
                         barcodeValues.forEach((barcodeValue, index) => {
                             const uniqueElementId = `${elementId}-${index}`; 
@@ -586,9 +770,9 @@
                         return; 
                     } else {
                         normalContentHtml.push(`
-                            <div class="flex flex-col sm:flex-row items-start text-sm border-b border-gray-300 py-2 text-red-600"> 
-                                <span class="property-key mr-2 text-red-600 font-bold">BARCODE:</span> 
-                                <span class="font-normal text-sm text-red-500">Nilai Barcode Kosong/Tidak Valid</span> 
+                            <div class="flex flex-col sm:flex-row items-start text-sm border-b border-gray-300 py-2 text-red-400"> 
+                                <span class="property-key mr-2 font-bold">BARCODE:</span> 
+                                <span class="font-normal text-sm">Nilai Barcode Kosong/Tidak Valid</span> 
                             </div>
                         `);
                         return; 
@@ -601,24 +785,24 @@
 
                 
                 let displayValue = String(value);
-                let valueClass = 'text-gray-700 font-medium';
+                let valueClass = 'font-medium text-gray-700'; 
                 let isPrice = false;
 
                 if (key === 'PRICE') {
                     displayValue = formatToIDR(value);
-                    valueClass = 'text-red-600 font-extrabold text-3xl'; 
+                    valueClass = 'text-red-400 font-extrabold text-3xl'; 
                     isPrice = true;
                 } else {
                     displayValue = (typeof value === 'object' && value !== null)
-                        ? `<pre class="bg-gray-200 p-2 rounded text-xs overflow-x-auto mt-1 text-gray-700">${JSON.stringify(value, null, 2)}</pre>` 
+                        ? `<pre class="bg-gray-800 bg-opacity-50 p-2 rounded text-xs overflow-x-auto mt-1 text-gray-100">${JSON.stringify(value, null, 2)}</pre>` 
                         : String(value);
-                    valueClass = 'text-gray-700 font-medium text-sm'; 
+                    valueClass = 'font-medium text-sm text-gray-700'; 
                 }
                 
                 const currentHtml = `
                     <div class="flex flex-col sm:flex-row items-start text-sm border-b border-gray-200 last:border-b-0 py-2"> 
-                        <span class="property-key mr-2 text-gray-600">${displayKey}:</span> 
-                        <span class="flex-1 break-words ${valueClass} ${isPrice ? 'mt-1 sm:mt-0' : 'mt-0'}">${displayValue}</span>
+                        <span class="property-key mr-2">${displayKey}:</span> 
+                        <span class="flex-1 break-words text-gray-700 ${valueClass} ${isPrice ? 'mt-1 sm:mt-0' : 'mt-0'}">${displayValue}</span> 
                     </div>
                 `;
                 
@@ -636,19 +820,19 @@
             const shelfLocationHtml = `
                 <div class="border-b border-gray-200 py-2">
                     <div class="flex flex-col sm:flex-row items-start text-sm mb-2"> 
-                        <span class="property-key mr-2 text-gray-600">MODIS:</span> 
+                        <span class="property-key mr-2">MODIS:</span> 
                         <span class="flex-1 break-words text-gray-700 font-bold text-base">${itemModis}</span> 
                     </div>
                     
                     <div class="grid grid-cols-2 gap-4 border-t border-gray-200 pt-2">
                         <div class="flex flex-col text-sm border-r border-gray-200 pr-4">
-                            <span class="property-key text-gray-600">SHELF:</span> 
+                            <span class="property-key">SHELF:</span> 
                             <span class="break-words text-gray-700 font-bold text-base">${itemShelf}</span>
-                        </div>
-                        <div class="flex flex-col text-sm">
-                            <span class="property-key text-gray-600">BARIS:</span> 
+                            </div>
+                            <div class="flex flex-col text-sm">
+                            <span class="property-key">BARIS:</span> 
                             <span class="break-words text-gray-700 font-bold text-base">${itemBaris}</span>
-                        </div>
+                            </div>
                     </div>
                 </div>
             `;
@@ -697,6 +881,9 @@
             if (currentResults.length > 1) {
                 navStatus.classList.remove('hidden');
                 navStatus.textContent = `${currentIndex + 1} dari ${currentResults.length}`;
+                
+                navStatus.classList.add('text-gray-100'); 
+                navStatus.classList.remove('text-gray-700'); 
 
                 prevButton.classList.remove('hidden');
                 nextButton.classList.remove('hidden');
@@ -716,13 +903,6 @@
 
 
         function handleSearch() {
-            initialMessageDiv.classList.add('hidden');
-            noResultsDiv.classList.add('hidden');
-            errorDiv.classList.add('hidden');
-            
-            feedbackMessageDiv.classList.add('hidden'); 
-            feedbackMessageDiv.classList.remove('toast-show');
-            
             instantCloseModal(); 
             
             const searchTerm = searchInput.value.toLowerCase().trim();
@@ -732,13 +912,12 @@
             const selectedShelfEnd = parseInt(filterShelfEnd.value.trim());
             
             if (!globalData || globalData.length === 0) {
-                 errorTextSpan.textContent = "Data belum dimuat atau kosong.";
-                 errorDiv.classList.remove('hidden');
+                 showSwal('error', 'Data belum dimuat!', 'Silakan coba muat ulang halaman atau periksa koneksi internet.');
                  return;
             }
 
             if (searchTerm.length === 0 && !selectedModis && filterShelfStart.value.trim() === "" && filterShelfEnd.value.trim() === "") {
-                feedbackMessageDiv.classList.remove('hidden');
+                showSwal('warning', 'Peringatan Pencarian', 'Harap masukkan kata kunci atau pilih filter untuk mencari.');
                 return; 
             }
 
@@ -793,7 +972,17 @@
         }
         
         async function fetchAndInitializeData() {
-            loadingDiv.classList.remove('hidden');
+            Swal.fire({
+                title: 'Memuat Data...',
+                html: 'Sedang mengambil data dari server. Harap tunggu...',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                },
+                customClass: {
+                    popup: 'glass-swal' 
+                }
+            });
             
             try {
                 const response = await fetch(JSON_URL);
@@ -808,14 +997,13 @@
                 
                 populateIttFilters(); 
                 
-                loadingDiv.classList.add('hidden');
-                initialMessageDiv.classList.remove('hidden');
+                Swal.close(); 
+                showSwalToast('success', 'Data berhasil dimuat!'); 
 
             } catch (error) {
-                errorTextSpan.textContent = `Kesalahan: ${error.message}. Pastikan URL JSON valid dan berformat array JSON ([{...}, ...]).`;
                 
-                loadingDiv.classList.add('hidden');
-                errorDiv.classList.remove('hidden');
+                Swal.close(); 
+                showSwal('error', 'Gagal memuat data!', `Kesalahan: ${error.message}. Pastikan URL JSON valid dan berformat array JSON ([{...}, ...]).`);
             }
         }
         
