@@ -198,6 +198,16 @@
         .barcode-section .border-t {
             border-color: rgba(0, 0, 0, 0.1) !important;
         }
+        
+        .hidden-barcodes {
+            overflow: hidden; 
+            max-height: 0; 
+            transition: max-height 0.5s ease-in-out; 
+        }
+        .hidden-barcodes.expanded {
+            max-height: 1000px; 
+        }
+
 
         .modal-footer {
             background-color: rgba(255, 255, 255, 0.05); 
@@ -615,6 +625,24 @@
             resultModalDiv.classList.add('hidden');
             document.body.style.overflow = 'auto';
         }
+        
+        window.toggleHiddenBarcodes = function(elementId, buttonId) {
+            const hiddenDiv = document.getElementById(elementId);
+            const button = document.getElementById(buttonId);
+            
+            if (hiddenDiv.classList.contains('expanded')) {
+                hiddenDiv.classList.remove('expanded');
+                button.innerHTML = `<i data-lucide="chevrons-down" class="h-4 w-4 mr-1"></i> Tampilkan Semua Barcode`;
+            } else {
+                hiddenDiv.classList.add('expanded');
+                button.innerHTML = `<i data-lucide="chevrons-up" class="h-4 w-4 mr-1"></i> Sembunyikan Barcode Lain`;
+            }
+            lucide.createIcons();
+            
+            const container = document.querySelector('.modal-content-container');
+            if(container) container.scrollTop = container.scrollTop;
+        };
+
 
         function displayResultsInModal(items) {
             currentResults = items;
@@ -762,18 +790,23 @@
                 const isBarisKey = key === 'KIRIKANAN';
 
                 if (isBarcodeKey) {
-                    let barcodeValues = [];
+                    let allBarcodeValues = [];
                     if (Array.isArray(value)) {
-                        barcodeValues = value.filter(v => typeof v === 'string' && v.trim().length > 0);
+                        allBarcodeValues = value.filter(v => typeof v === 'string' && v.trim().length > 0);
                     } else if (typeof value === 'string' && value.trim().length > 0) {
-                        barcodeValues = [value];
+                        allBarcodeValues = [value];
                     }
                     
-                    if (barcodeValues.length > 0) {
+                    if (allBarcodeValues.length > 0) {
+                        const visibleBarcodes = allBarcodeValues.slice(0, 1);
+                        const hiddenBarcodes = allBarcodeValues.slice(1);
+                        const hiddenDivId = `hidden-barcodes-container-${currentIndex}`;
+                        const toggleButtonId = `toggle-barcodes-btn-${currentIndex}`;
+                        
                         let currentBarcodeHtml = `<div class="mb-4 p-4 barcode-section rounded-xl shadow-md text-center"> 
                             <h4 class="text-xl font-bold mb-2">${pluValue}</h4> `; 
                         
-                        barcodeValues.forEach((barcodeValue, index) => {
+                        visibleBarcodes.forEach((barcodeValue, index) => {
                             const uniqueElementId = `${elementId}-${index}`; 
                             
                             barcodesToRender.push({ id: uniqueElementId, value: barcodeValue });
@@ -783,7 +816,34 @@
                                     <svg id="${uniqueElementId}" data-barcode-value="${barcodeValue}" class="w-full h-14"></svg>
                                 </div>
                             `;
+                            
+                            if (hiddenBarcodes.length > 0) {
+                                currentBarcodeHtml += `
+                                    <div class="text-center mt-3">
+                                        <button id="${toggleButtonId}" onclick="toggleHiddenBarcodes('${hiddenDivId}', '${toggleButtonId}')" 
+                                                class="px-3 py-1.5 text-xs font-semibold bg-emerald-100 text-emerald-700 hover:bg-emerald-200 rounded-lg transition duration-150 flex items-center justify-center mx-auto">
+                                            <i data-lucide="chevrons-down" class="h-4 w-4 mr-1"></i> Tampilkan ${hiddenBarcodes.length} Barcode Lain
+                                        </button>
+                                    </div>
+                                `;
+                            }
                         });
+                        
+                        if (hiddenBarcodes.length > 0) {
+                            currentBarcodeHtml += `<div id="${hiddenDivId}" class="hidden-barcodes">`;
+                            hiddenBarcodes.forEach((barcodeValue, index) => {
+                                const uniqueElementId = `${elementId}-${1 + index}`; 
+                                barcodesToRender.push({ id: uniqueElementId, value: barcodeValue });
+                                
+                                currentBarcodeHtml += `
+                                    <div class="mt-3 pt-3 border-t border-gray-300"> 
+                                        <svg id="${uniqueElementId}" data-barcode-value="${barcodeValue}" class="w-full h-14"></svg>
+                                    </div>
+                                `;
+                            });
+                            currentBarcodeHtml += `</div>`;
+                        }
+
                         currentBarcodeHtml += `</div>`;
                         barcodeHtml = currentBarcodeHtml; 
                         return; 
@@ -818,16 +878,24 @@
                     valueClass = 'font-medium text-sm text-gray-700'; 
                 }
                 
-                const currentHtml = `
-                    <div class="flex flex-col sm:flex-row items-start text-sm border-b border-gray-200 last:border-b-0 py-2"> 
-                        <span class="property-key mr-2">${displayKey}:</span> 
-                        <span class="flex-1 break-words text-gray-700 ${valueClass} ${isPrice ? 'mt-1 sm:mt-0' : 'mt-0'}">${displayValue}</span> 
-                    </div>
-                `;
+                let currentHtml;
                 
                 if (isPrice) {
+                    currentHtml = `
+                        <div class="flex items-center justify-center py-2"> 
+                            <span class="text-lg font-semibold text-gray-300 mr-2">HARGA NORMAL :</span> 
+                            <span class="text-2xl font-extrabold text-red-400">${displayValue}</span> 
+                        </div>
+                    `;
                     priceHtml = currentHtml; 
+                    return;
                 } else {
+                     currentHtml = `
+                        <div class="flex flex-col sm:flex-row items-start text-sm border-b border-gray-200 last:border-b-0 py-2"> 
+                            <span class="property-key mr-2">${displayKey}:</span> 
+                            <span class="flex-1 break-words text-gray-700 ${valueClass}">${displayValue}</span> 
+                        </div>
+                    `;
                     normalContentHtml.push(currentHtml); 
                 }
             });
@@ -861,7 +929,7 @@
 
             const finalPriceHtml = priceHtml 
                 ? `<div class="mt-4 pt-4 border-t-2 border-red-500 text-center">
-                       ${priceHtml.replace(/flex flex-col sm:flex-row items-start/, 'flex flex-col items-center').replace(/flex-1 break-words/, 'block w-full')}
+                       ${priceHtml}
                    </div>`
                 : '';
             
@@ -886,6 +954,8 @@
             }
             
             modalCardContentDiv.innerHTML = finalContentHtml;
+
+            lucide.createIcons(); 
 
             setTimeout(() => {
                 barcodesToRender.forEach(({ id, value }) => renderSingleBarcode(id, value, "#000000")); 
