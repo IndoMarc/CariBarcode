@@ -246,6 +246,19 @@
         input:focus, select:focus {
             box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.3); 
         }
+        
+        #close-btn-top {
+            position: absolute;
+            top: 2rem; 
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 60; 
+        }
+        @media (min-width: 640px) {
+            #close-btn-top {
+                top: 3rem; 
+            }
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center">
@@ -332,6 +345,14 @@
         
     </div> 
     
+    <div id="close-btn-top" class="hidden">
+        <button id="close-button-main" onclick="closeModal()" 
+                class="p-3 glass-circle rounded-full transition duration-150 focus:outline-none focus:ring-4 focus:ring-red-300 hover:bg-red-600 shadow-xl"
+                title="Tutup Hasil Pencarian">
+            <i data-lucide="x" class="h-6 w-6 text-red-600 hover:text-white"></i> 
+        </button>
+    </div>
+
     <div id="result-modal" class="modal-overlay hidden fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
         
         <div class="modal-content w-full max-w-sm md:max-w-md rounded-2xl shadow-3xl relative" onclick="event.stopPropagation()">
@@ -341,14 +362,14 @@
                 </div>
             </div>
 
-            <div class="modal-footer p-3 sm:p-4 border-t flex flex-col sm:flex-row justify-between items-center rounded-b-2xl">
+            <div class="modal-footer p-3 sm:p-4 border-t flex flex-row justify-center items-center rounded-b-2xl">
                 
-                <div id="modal-navigation" class="flex items-center justify-center sm:justify-start w-full sm:w-auto mb-3 sm:mb-0">
+                <div id="modal-navigation" class="flex items-center justify-center w-full sm:w-auto">
                     <button id="prev-button" onclick="navigateResult(-1)" 
                             class="hidden p-2 glass-circle rounded-full transition duration-150 focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed">
                          <i data-lucide="chevron-left" class="h-5 w-5 text-gray-800"></i> </button>
                     
-                    <p id="nav-status" class="text-sm font-semibold mx-3 sm:mx-4 text-gray-700 hidden">
+                    <p id="nav-status" class="text-sm font-semibold mx-3 sm:mx-4 text-gray-100 hidden">
                     </p>
                     
                     <button id="next-button" onclick="navigateResult(1)" 
@@ -356,10 +377,6 @@
                          <i data-lucide="chevron-right" class="h-5 w-5 text-gray-800"></i> </button>
                 </div>
                 
-                <button onclick="closeModal()" 
-                        class="w-full sm:w-auto bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-5 rounded-xl transition duration-200 shadow-md focus:ring-2 focus:ring-red-400">
-                    Tutup
-                </button>
             </div>
 
         </div>
@@ -377,6 +394,7 @@
         const prevButton = document.getElementById('prev-button');
         const nextButton = document.getElementById('next-button');
         const navStatus = document.getElementById('nav-status');
+        const closeBtnTop = document.getElementById('close-btn-top'); 
         
         const ittFiltersDiv = document.getElementById('itt-filters');
         const filterModis = document.getElementById('filter-modis');
@@ -614,6 +632,7 @@
 
         function closeModal() {
             resultModalDiv.classList.remove('modal-show');
+            closeBtnTop.classList.add('hidden'); 
             setTimeout(() => {
                 resultModalDiv.classList.add('hidden');
                 document.body.style.overflow = 'auto'; 
@@ -623,6 +642,7 @@
         function instantCloseModal() {
             resultModalDiv.classList.remove('modal-show');
             resultModalDiv.classList.add('hidden');
+            closeBtnTop.classList.add('hidden'); 
             document.body.style.overflow = 'auto';
         }
         
@@ -689,6 +709,7 @@
             updateModalContent(0);
             
             resultModalDiv.classList.remove('hidden');
+            closeBtnTop.classList.remove('hidden'); 
             document.body.style.overflow = 'hidden'; 
             setTimeout(() => resultModalDiv.classList.add('modal-show'), 10); 
         }
@@ -905,21 +926,21 @@
             const itemBaris = item.KIRIKANAN || '-';
             
             const shelfLocationHtml = `
-                <div class="border-b border-gray-200 py-2">
-                    <div class="flex flex-col sm:flex-row items-start text-sm mb-2"> 
-                        <span class="property-key mr-2">MODIS:</span> 
-                        <span class="flex-1 break-words text-gray-700 font-bold text-base">${itemModis}</span> 
+                <div class="border-b border-gray-200 py-2 text-center">
+                    <div class="mb-3"> 
+                        <span class="property-key block w-auto min-w-0 mx-auto text-center">MODIS :</span> 
+                        <span class="block break-words text-gray-700 font-bold text-base">${itemModis}</span> 
                     </div>
                     
-                    <div class="grid grid-cols-2 gap-4 border-t border-gray-200 pt-2">
-                        <div class="flex flex-col text-sm border-r border-gray-200 pr-4">
-                            <span class="property-key">SHELF:</span> 
-                            <span class="break-words text-gray-700 font-bold text-base">${itemShelf}</span>
-                            </div>
-                            <div class="flex flex-col text-sm">
-                            <span class="property-key">BARIS:</span> 
-                            <span class="break-words text-gray-700 font-bold text-base">${itemBaris}</span>
-                            </div>
+                    <div class="grid grid-cols-2 gap-4 border-t border-gray-200 pt-3">
+                        <div class="flex flex-col text-sm border-r border-gray-200 pr-4 items-center">
+                            <span class="property-key w-auto min-w-0">SHELF :</span> 
+                            <span class="break-words text-gray-700 font-bold text-sm">${itemShelf}</span>
+                        </div>
+                        <div class="flex flex-col text-sm items-center">
+                            <span class="property-key w-auto min-w-0">BARIS :</span> 
+                            <span class="break-words text-gray-700 font-bold text-sm">${itemBaris}</span>
+                        </div>
                     </div>
                 </div>
             `;
