@@ -6,8 +6,11 @@
     <title>Cari Barcode PLU & Scan ITT</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script> 
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     
     <style>
         :root {
@@ -54,7 +57,7 @@
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
-            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.9); 
+            text-shadow: 0 3px 6px rgba(0, 0, 0, 0.7); 
         }
 
         .glass-effect {
@@ -199,6 +202,19 @@
             border-color: rgba(0, 0, 0, 0.1) !important;
         }
         
+        .qrcode-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+        }
+        .qrcode-label {
+            margin-top: 0.5rem;
+            font-size: 0.75rem;
+            color: #4b5563;
+            font-weight: 500;
+        }
+
         .hidden-barcodes {
             overflow: hidden; 
             max-height: 0; 
@@ -259,6 +275,45 @@
                 top: 3rem; 
             }
         }
+        
+        .segmented-control {
+            display: flex;
+            padding: 0.25rem; 
+            border-radius: 0.75rem; 
+            background-color: rgba(255, 255, 255, 0.1); 
+            border: 1px solid rgba(255, 255, 255, 0.2); 
+        }
+
+        .segmented-control-item {
+            flex: 1;
+            text-align: center;
+        }
+
+        .segmented-control-item input[type="radio"] {
+            display: none;
+        }
+
+        .segmented-control-item label {
+            display: block;
+            padding: 0.5rem 0.75rem; 
+            border-radius: 0.5rem; 
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.2s, box-shadow 0.2s, color 0.2s;
+            color: #d1d5db; 
+            font-size: 0.875rem; 
+        }
+
+        .segmented-control-item input[type="radio"]:checked + label {
+            background-color: rgba(16, 185, 129, 0.9); 
+            color: #ffffff; 
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+        }
+
+        .segmented-control-item input[type="radio"]:hover:not(:checked) + label {
+            background-color: rgba(255, 255, 255, 0.1); 
+            color: #ffffff; 
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center">
@@ -267,8 +322,8 @@
 
     <div class="w-full max-w-xl lg:max-w-3xl flex flex-col items-center">
     
-        <div id="main-container" class="w-full p-4 sm:p-6 z-10 relative"> 
-            <header class="text-center py-6 md:py-8 mb-4"> 
+        <div id="main-container" class="w-full px-4 sm:px-8 pt-4 sm:pt-6 pb-4 sm:pb-6 z-10 relative"> 
+            <header class="text-center py-4 md:py-6 mb-2"> 
                 <h1 class="header-title text-4xl sm:text-5xl font-extrabold tracking-tight">
                  CARI BARCODE & SCAN ITT
                 </h1>
@@ -281,7 +336,7 @@
                     <input 
                         id="search-input" 
                         type="text" 
-                        placeholder="Masukkan PLU, Nama, atau Barcode..."
+                        placeholder="Ketik PLU, Nama, atau Barcode ..."
                         class="w-full p-3 pl-10 pr-4 border-2 border-gray-700 rounded-xl glass-input text-gray-100 placeholder-gray-500 focus:border-emerald-500 focus:ring-1 outline-none transition duration-150 font-medium"
                         >
                 </div>
@@ -292,26 +347,59 @@
                      <i data-lucide="list-filter" class="h-5 w-5 text-amber-500"></i>
                      <span>Filter Scan ITT WDCP / PDA</span>
                 </h4>
-                <div class="grid grid-cols-1 gap-4 md:grid-cols-3"> 
-                    <div>
-                        <label for="filter-modis" class="block text-sm font-medium text-gray-300 mb-1">Pilih Modis</label>
-                        <select id="filter-modis" class="w-full p-3 border-2 border-gray-700 rounded-xl glass-input text-gray-100 focus:border-emerald-500 focus:ring-1 outline-none transition duration-150">
-                            <option value="">-- Semua Modis --</option>
-                        </select>
+                
+                <div class="pt-2 mb-4">
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Pilih Tampilan :</label>
+                    <div class="segmented-control">
+                        <div class="segmented-control-item">
+                            <input type="radio" id="display-barcode" name="displayType" value="barcode" checked onclick="clearDisplayAndFocus()">
+                            <label for="display-barcode">Barcode</label>
+                        </div>
+                        <div class="segmented-control-item">
+                            <input type="radio" id="display-qrcode" name="displayType" value="qrcode" onclick="clearDisplayAndFocus()">
+                            <label for="display-qrcode">QR Code</label>
+                        </div>
                     </div>
-                    
-                    <div>
-                        <label for="filter-shelf-start" class="block text-sm font-medium text-gray-300 mb-1">Shelf Dari</label>
-                        <select id="filter-shelf-start" class="w-full p-3 border-2 border-gray-700 rounded-xl glass-input text-gray-100 focus:border-emerald-500 focus:ring-1 outline-none transition duration-150">
-                            <option value="">-- Pilih Shelf Awal --</option>
-                        </select>
-                    </div>
-                    
-                    <div>
-                        <label for="filter-shelf-end" class="block text-sm font-medium text-gray-300 mb-1">Shelf Sampai</label>
-                        <select id="filter-shelf-end" class="w-full p-3 border-2 border-gray-700 rounded-xl glass-input text-gray-100 focus:border-emerald-500 focus:ring-1 outline-none transition duration-150">
-                            <option value="">-- Pilih Shelf Akhir --</option>
-                        </select>
+                </div>
+                
+                <div class="border-t border-amber-900 pt-4"> 
+                    <div class="space-y-4">
+                        <div class="grid grid-cols-2 gap-4"> 
+                            <div>
+                                <label for="filter-modis" class="block text-sm font-medium text-gray-300 mb-1">Pilih Modis :</label>
+                                <select id="filter-modis" class="w-full p-3 border-2 border-gray-700 rounded-xl glass-input text-gray-100 focus:border-emerald-500 focus:ring-1 outline-none transition duration-150">
+                                    <option value="">Pilih Modis</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label for="filter-shelf-start" class="block text-sm font-medium text-gray-300 mb-1">Shelf Dari :</label>
+                                <select id="filter-shelf-start" class="w-full p-3 border-2 border-gray-700 rounded-xl glass-input text-gray-100 focus:border-emerald-500 focus:ring-1 outline-none transition duration-150">
+                                    <option value="">Pilih Shelf Awal</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4"> 
+                            <div>
+                                <label for="filter-shelf-end" class="block text-sm font-medium text-gray-300 mb-1">Shelf Sampai :</label>
+                                <select id="filter-shelf-end" class="w-full p-3 border-2 border-gray-700 rounded-xl glass-input text-gray-100 focus:border-emerald-500 focus:ring-1 outline-none transition duration-150">
+                                    <option value="">Pilih Shelf Akhir</option>
+                                </select>
+                            </div>
+                        
+                            <div>
+                                <label for="filter-auto-slide" class="block text-sm font-medium text-gray-300 mb-1">Geser Otomatis :</label>
+                                <select id="filter-auto-slide" class="w-full p-3 border-2 border-gray-700 rounded-xl glass-input text-gray-100 focus:border-emerald-500 focus:ring-1 outline-none transition duration-150">
+                                    <option value="0" selected>0 Detik</option>
+                                    <option value="1000">1 Detik</option>
+                                    <option value="2000">2 Detik</option>
+                                    <option value="3000">3 Detik</option>
+                                    <option value="4000">4 Detik</option>
+                                    <option value="5000">5 Detik</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -323,7 +411,7 @@
                     class="w-1/2 glass-button-base glass-emerald py-3 px-8 rounded-xl shadow-lg transition duration-200 ease-in-out transform hover:scale-[1.005] active:scale-[0.99] focus:ring-4 focus:ring-emerald-300 focus:ring-offset-2 flex items-center justify-center space-x-2"
                     >
                     <i data-lucide="scan-line" class="h-5 w-5"></i>
-                    <span>CARI DATA</span>
+                    <span>PROSES</span>
                 </button>
                 
                  <button 
@@ -396,10 +484,13 @@
         const navStatus = document.getElementById('nav-status');
         const closeBtnTop = document.getElementById('close-btn-top'); 
         
-        const ittFiltersDiv = document.getElementById('itt-filters');
         const filterModis = document.getElementById('filter-modis');
         const filterShelfStart = document.getElementById('filter-shelf-start');
         const filterShelfEnd = document.getElementById('filter-shelf-end');
+        const filterAutoSlide = document.getElementById('filter-auto-slide'); 
+        
+        const displayBarcodeRadio = document.getElementById('display-barcode');
+        const displayQrcodeRadio = document.getElementById('display-qrcode');
         
         const timestampDiv = document.getElementById('timestamp');
 
@@ -409,7 +500,7 @@
         let width = canvas.width = window.innerWidth;
         let height = canvas.height = window.innerHeight;
 
-        const characters = 'アァカサタナハマヤラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユルグズブプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨロヲゴゾドボポヴッン0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+        const characters = '01x'
         
         const font_size = 14; 
         let columns = Math.floor(width / font_size);
@@ -418,6 +509,8 @@
         for (let i = 0; i < columns; i++) {
             drops[i] = 1; 
         }
+
+        let autoNavigateInterval = null; 
 
         function drawMatrix() {
             ctx.fillStyle = 'rgba(0, 0, 0, 0.04)'; 
@@ -481,6 +574,14 @@
                 if (e.key === 'Enter') {
                     handleSearch();
                 }
+            });
+            
+            filterAutoSlide.addEventListener('change', () => {
+                 clearDisplayAndFocus(); 
+                 stopAutoNavigation(); 
+                 if (filterAutoSlide.value !== '0') {
+                     showSwalToast('info', 'Pilihan Geser Otomatis diubah. Tekan CARI DATA untuk mengaktifkannya.');
+                 }
             });
             
             fetchAndInitializeData();
@@ -566,7 +667,11 @@
             filterModis.value = '';
             filterShelfStart.value = '';
             filterShelfEnd.value = '';
+            
+            displayBarcodeRadio.checked = true;
+            filterAutoSlide.value = '0'; 
 
+            stopAutoNavigation();
             clearDisplayAndFocus();
             
             showSwalToast('info', 'Input dan Filter berhasil di-RESET!');
@@ -607,7 +712,7 @@
                                 ? shelfArray.sort((a, b) => a - b) 
                                 : shelfArray.sort((a, b) => String(a).localeCompare(String(b)));
             
-            filterModis.innerHTML = '<option value="">-- Semua Modis --</option>';
+            filterModis.innerHTML = '<option value="">Pilih Modis</option>';
             sortedModis.forEach(modis => {
                 const option = document.createElement('option');
                 option.value = modis;
@@ -617,8 +722,8 @@
             
             const shelfOptionsHtml = sortedShelf.map(shelf => `<option value="${shelf}">${shelf}</option>`).join('');
             
-            filterShelfStart.innerHTML = '<option value="">-- Pilih Shelf Awal --</option>' + shelfOptionsHtml;
-            filterShelfEnd.innerHTML = '<option value="">-- Pilih Shelf Akhir --</option>' + shelfOptionsHtml;
+            filterShelfStart.innerHTML = '<option value="">Pilih Shelf Awal</option>' + shelfOptionsHtml;
+            filterShelfEnd.innerHTML = '<option value="">Pilih Shelf Akhir</option>' + shelfOptionsHtml;
             
             filterModis.addEventListener('change', clearDisplayAndFocus);
             filterShelfStart.addEventListener('change', clearDisplayAndFocus);
@@ -631,6 +736,7 @@
         }
 
         function closeModal() {
+            stopAutoNavigation(); 
             resultModalDiv.classList.remove('modal-show');
             closeBtnTop.classList.add('hidden'); 
             setTimeout(() => {
@@ -640,6 +746,7 @@
         }
         
         function instantCloseModal() {
+            stopAutoNavigation(); 
             resultModalDiv.classList.remove('modal-show');
             resultModalDiv.classList.add('hidden');
             closeBtnTop.classList.add('hidden'); 
@@ -662,7 +769,34 @@
             const container = document.querySelector('.modal-content-container');
             if(container) container.scrollTop = container.scrollTop;
         };
+        
+        function startAutoNavigation() {
+            stopAutoNavigation(); 
+            
+            const delayInMs = parseInt(filterAutoSlide.value);
+            
+            if (delayInMs > 0 && currentResults.length > 1) {
+                autoNavigateInterval = setInterval(() => {
+                    const nextIndex = currentIndex + 1;
+                    if (nextIndex < currentResults.length) {
+                        navigateResult(1); 
+                    } else {
+                        currentIndex = -1; 
+                        navigateResult(1);
+                    }
+                }, delayInMs);
+                
+                showSwalToast('info', `Geser Otomatis Aktif (${delayInMs/1000} detik)`);
+            } else if (delayInMs === 0) {
+            }
+        }
 
+        function stopAutoNavigation() {
+            if (autoNavigateInterval) {
+                clearInterval(autoNavigateInterval);
+                autoNavigateInterval = null;
+            }
+        }
 
         function displayResultsInModal(items) {
             currentResults = items;
@@ -708,6 +842,8 @@
             currentIndex = 0;
             updateModalContent(0);
             
+            startAutoNavigation(); 
+            
             resultModalDiv.classList.remove('hidden');
             closeBtnTop.classList.remove('hidden'); 
             document.body.style.overflow = 'hidden'; 
@@ -717,6 +853,11 @@
         function navigateResult(direction) {
             const newIndex = currentIndex + direction;
             if (newIndex >= 0 && newIndex < currentResults.length) {
+                
+                if (autoNavigateInterval) {
+                    stopAutoNavigation();
+                    startAutoNavigation(); 
+                }
                 
                 modalCardContentDiv.classList.remove('content-active');
                 if (direction === 1) {
@@ -756,6 +897,9 @@
             const item = currentResults[currentIndex];
             if (!item) return;
 
+            const displayType = document.querySelector('input[name="displayType"]:checked').value;
+            const isBarcodeDisplay = displayType === 'barcode';
+            
             let normalContentHtml = []; 
             let priceHtml = ''; 
             let barcodeHtml = ''; 
@@ -830,11 +974,12 @@
                         visibleBarcodes.forEach((barcodeValue, index) => {
                             const uniqueElementId = `${elementId}-${index}`; 
                             
-                            barcodesToRender.push({ id: uniqueElementId, value: barcodeValue });
+                            barcodesToRender.push({ id: uniqueElementId, value: barcodeValue, isBarcode: isBarcodeDisplay });
                             
                             currentBarcodeHtml += `
                                 <div class="mt-3 pt-3 border-t border-gray-300 first:border-t-0 first:mt-0"> 
-                                    <svg id="${uniqueElementId}" data-barcode-value="${barcodeValue}" class="w-full h-14"></svg>
+                                    <div id="${uniqueElementId}" data-barcode-value="${barcodeValue}" class="${isBarcodeDisplay ? 'w-full h-14' : 'qrcode-container'}"></div>
+                                    <div class="qrcode-label mt-1">${barcodeValue}</div>
                                 </div>
                             `;
                             
@@ -854,11 +999,12 @@
                             currentBarcodeHtml += `<div id="${hiddenDivId}" class="hidden-barcodes">`;
                             hiddenBarcodes.forEach((barcodeValue, index) => {
                                 const uniqueElementId = `${elementId}-${1 + index}`; 
-                                barcodesToRender.push({ id: uniqueElementId, value: barcodeValue });
+                                barcodesToRender.push({ id: uniqueElementId, value: barcodeValue, isBarcode: isBarcodeDisplay });
                                 
                                 currentBarcodeHtml += `
                                     <div class="mt-3 pt-3 border-t border-gray-300"> 
-                                        <svg id="${uniqueElementId}" data-barcode-value="${barcodeValue}" class="w-full h-14"></svg>
+                                        <div id="${uniqueElementId}" data-barcode-value="${barcodeValue}" class="${isBarcodeDisplay ? 'w-full h-14' : 'qrcode-container'}"></div>
+                                        <div class="qrcode-label mt-1">${barcodeValue}</div>
                                     </div>
                                 `;
                             });
@@ -979,7 +1125,13 @@
             lucide.createIcons(); 
 
             setTimeout(() => {
-                barcodesToRender.forEach(({ id, value }) => renderSingleBarcode(id, value, "#000000")); 
+                barcodesToRender.forEach(({ id, value, isBarcode }) => {
+                    if (isBarcode) {
+                        renderSingleBarcode(id, value, "#000000"); 
+                    } else {
+                        renderSingleQRCode(id, value);
+                    }
+                });
                 
                 modalCardContentDiv.classList.add('content-active');
                 if (direction !== 0) {
@@ -1133,20 +1285,43 @@
         }
         
         function renderSingleBarcode(elementId, value, lineColor = "#000000") {
-             const svgElement = document.getElementById(elementId);
-             if (!svgElement) return;
+             const container = document.getElementById(elementId);
+             if (!container) return;
+             
+             const svgId = `${elementId}-svg`;
+             container.innerHTML = `<svg id="${svgId}" class="w-full h-14"></svg>`;
 
              try {
-                JsBarcode(`#${elementId}`, value, {
+                JsBarcode(`#${svgId}`, value, {
                     format: "CODE128",
-                    displayValue: true, 
+                    displayValue: false, 
                     lineColor: lineColor, 
                     width: 4, 
-                    height: 90, 
+                    height: 100, 
                     margin: 0
                 });
              } catch (e) {
-                svgElement.outerHTML = `<p class=\"text-sm text-red-500 text-center\">❌ Error Barcode: ${e.message}</p>`;
+                container.innerHTML = `<p class=\"text-sm text-red-500 text-center\">❌ Error Barcode: ${e.message}</p>`;
+             }
+        }
+        
+        function renderSingleQRCode(elementId, value) {
+             const element = document.getElementById(elementId);
+             if (!element) return;
+             
+             element.innerHTML = '';
+             
+             try {
+                 new QRCode(element, {
+                     text: value,
+                     width: 128,
+                     height: 128,
+                     colorDark: "#000000",
+                     colorLight: "#ffffff",
+                     correctLevel: QRCode.CorrectLevel.H
+                 });
+             } catch (e) {
+                 element.innerHTML = `<p class=\"text-sm text-red-500 text-center\">❌ Error QR: ${e.message}</p>`;
              }
         }
 
