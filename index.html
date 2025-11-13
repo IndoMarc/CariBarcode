@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cari Barcode PLU & Scan ITT</title>
+    <title>Indeks Program Barcode</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script> 
@@ -17,43 +17,13 @@
             font-family: 'Inter', sans-serif;
         }
         
-        #matrix-canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: block;
-            background: #000; 
-            z-index: 0;
-        }
-
         body {
-            background-color: #000; 
+            background-color: #0d1a26;
+            overflow-x: hidden;
         }
         
-        #main-container {
-            z-index: 10;
-            position: relative;
-        }
-        
-        footer {
-            z-index: 15; 
-            position: relative; 
-            text-align: center;
-            max-width: 100%; 
-            margin-top: 1rem; 
-            margin-bottom: 2rem; 
-        }
-        
-        .content-wrapper {
-             width: 100%;
-             max-width: 56rem; 
-        }
-
-
         .header-title {
-            background-image: linear-gradient(to right, #ffffff, #e0e0e0); 
+            background-image: linear-gradient(to right, #ffffff, #87ceeb);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
@@ -74,27 +44,39 @@
 
         .glass-button-base {
             backdrop-filter: blur(5px);
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
-            transition: all 0.2s ease-in-out;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             border-width: 1px; 
             color: #fff; 
             font-weight: 600; 
+            border-radius: 1.5rem; 
+            padding: 1rem 2rem; 
         }
         
-        .glass-emerald {
-            background-color: rgba(16, 185, 129, 0.3); 
-            border-color: rgba(16, 185, 129, 0.6);
+        .glass-main-button {
+            background-color: rgba(79, 70, 229, 0.3);
+            border-color: rgba(79, 70, 229, 0.6);
+            box-shadow: 0 6px 20px rgba(79, 70, 229, 0.3); 
         }
-        .glass-emerald:hover {
-            background-color: rgba(16, 185, 129, 0.5); 
+        .glass-main-button:hover {
+            background-color: rgba(79, 70, 229, 0.5);
+            transform: scale(1.02); 
+        }
+        .glass-main-button:active {
+            transform: scale(0.99);
         }
 
-        .glass-gray {
-            background-color: rgba(107, 114, 128, 0.3); 
-            border-color: rgba(107, 114, 128, 0.6);
+        .glass-menu-button {
+            background-color: rgba(20, 184, 166, 0.3);
+            border-color: rgba(20, 184, 166, 0.6);
+            box-shadow: 0 6px 20px rgba(20, 184, 166, 0.3); 
         }
-        .glass-gray:hover {
-            background-color: rgba(107, 114, 128, 0.5); 
+        .glass-menu-button:hover {
+            background-color: rgba(20, 184, 166, 0.5);
+            transform: scale(1.02); 
+        }
+        .glass-menu-button:active {
+            transform: scale(0.99);
         }
 
         .glass-circle {
@@ -130,21 +112,43 @@
 
         .property-key {
             font-weight: 500; 
-            color: #4b5563; 
+            color: #94a3b8;
             min-width: 80px; 
             width: 90px; 
             flex-shrink: 0; 
             white-space: nowrap;
             font-size: 0.875rem; 
         }
-        @keyframes fadeInOut {
-            0% { opacity: 0; transform: translateY(-10px); }
-            10% { opacity: 1; transform: translateY(0); }
-            90% { opacity: 1; transform: translateY(0); }
-            100% { opacity: 0; transform: translateY(-10px); }
+        
+        .fade-in-up {
+            animation: fadeInUp 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
         }
-        .toast-show {
-            animation: fadeInOut 3s ease-in-out forwards;
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .fade-out-down {
+             animation: fadeOutDown 0.3s ease-in forwards;
+             pointer-events: none; 
+        }
+        
+        @keyframes fadeOutDown {
+            from {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateY(20px);
+            }
         }
 
         .modal-overlay {
@@ -206,18 +210,20 @@
             border-color: rgba(0, 0, 0, 0.1) !important;
         }
         
+        .barcode-section .qrcode-label {
+            color: #1f2937 !important; 
+            margin-top: 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
         .qrcode-container {
             display: flex;
             justify-content: center;
             align-items: center;
             padding: 1rem;
         }
-        .qrcode-label {
-            margin-top: 0.5rem;
-            font-size: 0.75rem;
-            color: #4b5563;
-            font-weight: 500;
-        }
+        
 
         .hidden-barcodes {
             overflow: hidden; 
@@ -244,7 +250,7 @@
             border-color: rgba(255, 255, 255, 0.15) !important;
         }
         .modal-content .border-red-500 {
-            border-color: #f87171 !important; 
+            color: #f87171 !important; 
         }
         
         .content-transition {
@@ -264,7 +270,8 @@
         }
         
         input:focus, select:focus {
-            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.3); 
+            box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.5);
+            border-color: rgba(6, 182, 212, 0.9);
         }
         
         #close-btn-top {
@@ -309,7 +316,7 @@
         }
 
         .segmented-control-item input[type="radio"]:checked + label {
-            background-color: rgba(16, 185, 129, 0.9); 
+            background-color: rgba(6, 182, 212, 0.9);
             color: #ffffff; 
             box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
         }
@@ -318,124 +325,331 @@
             background-color: rgba(255, 255, 255, 0.1); 
             color: #ffffff; 
         }
+        
+        .menu-button.active {
+            background-color: rgba(79, 70, 229, 0.9);
+            border-color: rgba(79, 70, 229, 0.9);
+            color: #ffffff;
+        }
+        
+        #main-container {
+             transition: all 0.5s ease-in-out; 
+        }
+        #main-container.menu-active {
+             justify-content: center;
+        }
+        
+        #main-footer {
+            background-color: #0d1a26; 
+            background-color: rgba(13, 26, 38, 0.9); 
+        }
+        
+        .bubbles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 0; 
+            pointer-events: none;
+        }
+
+        .bubbles li {
+            position: absolute;
+            list-style: none;
+            display: block;
+            width: 20px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            animation: up 25s infinite;
+            bottom: -100px;
+            border-radius: 50%; 
+        }
+
+        .bubbles li:nth-child(1) {
+            left: 25%;
+            width: 80px;
+            height: 80px;
+            animation-delay: 0s;
+        }
+
+        .bubbles li:nth-child(2) {
+            left: 10%;
+            width: 20px;
+            height: 20px;
+            animation-delay: 2s;
+            animation-duration: 12s;
+        }
+
+        .bubbles li:nth-child(3) {
+            left: 70%;
+            width: 20px;
+            height: 20px;
+            animation-delay: 4s;
+        }
+
+        .bubbles li:nth-child(4) {
+            left: 40%;
+            width: 60px;
+            height: 60px;
+            animation-delay: 0s;
+            animation-duration: 18s;
+        }
+
+        .bubbles li:nth-child(5) {
+            left: 65%;
+            width: 20px;
+            height: 20px;
+            animation-delay: 0s;
+        }
+
+        .bubbles li:nth-child(6) {
+            left: 75%;
+            width: 110px;
+            height: 110px;
+            animation-delay: 3s;
+        }
+
+        .bubbles li:nth-child(7) {
+            left: 35%;
+            width: 150px;
+            height: 150px;
+            animation-delay: 7s;
+        }
+
+        .bubbles li:nth-child(8) {
+            left: 50%;
+            width: 25px;
+            height: 25px;
+            animation-delay: 15s;
+            animation-duration: 45s;
+        }
+
+        .bubbles li:nth-child(9) {
+            left: 20%;
+            width: 15px;
+            height: 15px;
+            animation-delay: 2s;
+            animation-duration: 35s;
+        }
+
+        .bubbles li:nth-child(10) {
+            left: 85%;
+            width: 150px;
+            height: 150px;
+            animation-delay: 11s;
+        }
+        
+        .bubbles li:nth-child(11) {
+            left: 80%;
+            width: 30px;
+            height: 30px;
+            animation-delay: 5s;
+            animation-duration: 20s;
+        }
+
+        .bubbles li:nth-child(12) {
+            left: 5%;
+            width: 90px;
+            height: 90px;
+            animation-delay: 9s;
+            animation-duration: 30s;
+        }
+
+        .bubbles li:nth-child(13) {
+            left: 90%;
+            width: 50px;
+            height: 50px;
+            animation-delay: 1s;
+            animation-duration: 15s;
+        }
+
+        .bubbles li:nth-child(14) {
+            left: 45%;
+            width: 20px;
+            height: 20px;
+            animation-delay: 13s;
+        }
+
+        .bubbles li:nth-child(15) {
+            left: 30%;
+            width: 70px;
+            height: 70px;
+            animation-delay: 6s;
+            animation-duration: 40s;
+        }
+
+        @keyframes up {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-1000px) rotate(720deg);
+                opacity: 0;
+            }
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center">
     
-    <canvas id="matrix-canvas"></canvas>
+    <div class="bubbles">
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+    </div>
 
-    <div class="w-full max-w-xl lg:max-w-3xl flex flex-col items-center">
+    <div class="w-full max-w-xl lg:max-w-3xl flex flex-col items-center flex-grow pt-8 pb-12">
     
-        <div id="main-container" class="w-full px-4 sm:px-8 pt-4 sm:pt-6 pb-4 sm:pb-6 z-10 relative"> 
+        <div id="main-container" class="w-full px-4 sm:px-8 z-10 relative flex flex-col items-center flex-grow menu-active"> 
             <header class="text-center py-4 md:py-6 mb-2"> 
-                <h1 class="header-title text-4xl sm:text-5xl font-extrabold tracking-tight">
-                 CARI BARCODE & SCAN ITT
+                <h1 class="header-title text-4xl sm:text-5xl font-extrabold tracking-tight" id="main-header-title">
+                 INDEKS PROGRAM
                 </h1>
             </header>
-
-            <div class="glass-effect p-4 sm:p-6 rounded-2xl mb-4 flex flex-col space-y-3">
-                <div class="relative flex-grow">
-                    <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-500 z-10"></i>
-                    
-                    <input 
-                        id="search-input" 
-                        type="text" 
-                        placeholder="Ketik PLU, Nama, atau Barcode ..."
-                        class="w-full p-3 pl-10 pr-4 border-2 border-gray-700 rounded-xl glass-input text-gray-100 placeholder-gray-500 focus:border-emerald-500 focus:ring-1 outline-none transition duration-150 font-medium"
-                        >
-                </div>
+            
+            <div id="menu-selection" class="flex flex-col space-y-4 mb-6 w-full max-w-sm sm:max-w-md fade-in-up">
+                 <button 
+                    id="menu-barcode-modis" 
+                    onclick="selectMenu('barcode-modis')"
+                    class="w-full glass-button-base glass-main-button flex items-center justify-center space-x-3 text-lg"
+                    >
+                    <i data-lucide="barcode" class="h-6 w-6"></i>
+                    <span>CARI BARCODE / MODIS</span>
+                </button>
+                <button 
+                    id="menu-harga-promo" 
+                    onclick="selectMenu('harga-promo')"
+                    class="w-full glass-button-base glass-main-button flex items-center justify-center space-x-3 text-lg"
+                    >
+                    <i data-lucide="tag" class="h-6 w-6"></i>
+                    <span>CARI HARGA / PROMOSI</span>
+                </button>
+                 <button 
+                    id="menu-scan-itt" 
+                    onclick="selectMenu('scan-itt')"
+                    class="w-full glass-button-base glass-main-button flex items-center justify-center space-x-3 text-lg"
+                    >
+                    <i data-lucide="laptop-2" class="h-6 w-6"></i>
+                    <span>SCAN ITT WDCP / PDA</span>
+                </button>
             </div>
-
-            <div id="itt-filters" class="glass-effect p-4 sm:p-6 rounded-2xl mb-4 border border-amber-700">
-                <h4 class="text-lg font-bold text-gray-100 mb-4 flex items-center space-x-2 border-b pb-2 border-amber-900">
-                     <i data-lucide="list-filter" class="h-5 w-5 text-amber-500"></i>
-                     <span>Filter Scan ITT WDCP / PDA</span>
-                </h4>
-                
-                <div class="pt-2 mb-4">
-                    <label class="block text-sm font-medium text-gray-300 mb-2">Pilih Tampilan :</label>
-                    <div class="segmented-control">
-                        <div class="segmented-control-item">
-                            <input type="radio" id="display-barcode" name="displayType" value="barcode" checked onclick="clearDisplayAndFocus()">
-                            <label for="display-barcode">Barcode</label>
-                        </div>
-                        <div class="segmented-control-item">
-                            <input type="radio" id="display-qrcode" name="displayType" value="qrcode" onclick="clearDisplayAndFocus()">
-                            <label for="display-qrcode">QR Code</label>
-                        </div>
+            
+            <div id="content-area" class="w-full flex flex-col items-center max-w-lg">
+                <div id="search-input-container" class="glass-effect p-4 sm:p-6 rounded-2xl mb-4 flex flex-col space-y-3 hidden w-full">
+                    <div class="relative flex-grow">
+                        <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-500 z-10"></i>
+                        <input 
+                            id="search-input" 
+                            type="text" 
+                            placeholder="Ketik PLU, Nama, atau Barcode ..."
+                            class="w-full p-3 pl-10 pr-4 border-2 border-gray-700 rounded-xl glass-input text-gray-100 placeholder-gray-500 focus:border-cyan-500 focus:ring-1 outline-none transition duration-150 font-medium"
+                            >
                     </div>
                 </div>
-                
-                <div class="border-t border-amber-900 pt-4"> 
-                    <div class="space-y-4">
-                        <div class="grid grid-cols-2 gap-4"> 
-                            <div>
-                                <label for="filter-modis" class="block text-sm font-medium text-gray-300 mb-1">Pilih Modis :</label>
-                                <select id="filter-modis" class="w-full p-3 border-2 border-gray-700 rounded-xl glass-input text-gray-100 focus:border-emerald-500 focus:ring-1 outline-none transition duration-150">
-                                    <option value="">Pilih Modis</option>
-                                </select>
+
+                <div id="itt-filters" class="glass-effect p-4 sm:p-6 rounded-2xl mb-4 border border-indigo-700 hidden w-full">
+                    <h4 class="text-lg font-bold text-gray-100 mb-4 flex items-center space-x-2 border-b pb-2 border-indigo-800">
+                         <i data-lucide="list-filter" class="h-5 w-5 text-indigo-500"></i>
+                         <span>Filter Scan ITT WDCP / PDA</span>
+                    </h4>
+                    
+                    <div class="pt-2 mb-4">
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Pilih Tampilan :</label>
+                        <div class="segmented-control">
+                            <div class="segmented-control-item">
+                                <input type="radio" id="display-barcode" name="displayType" value="barcode" checked onclick="clearDisplayAndFocus()">
+                                <label for="display-barcode">Barcode</label>
+                            </div>
+                            <div class="segmented-control-item">
+                                <input type="radio" id="display-qrcode" name="displayType" value="qrcode" onclick="clearDisplayAndFocus()">
+                                <label for="display-qrcode">QR Code</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="border-t border-indigo-800 pt-4"> 
+                        <div class="space-y-4">
+                            <div class="grid grid-cols-2 gap-4"> 
+                                <div>
+                                    <label for="filter-modis" class="block text-sm font-medium text-gray-300 mb-1">Pilih Modis :</label>
+                                    <select id="filter-modis" class="w-full p-3 border-2 border-gray-700 rounded-xl glass-input text-gray-100 focus:border-cyan-500 focus:ring-1 outline-none transition duration-150">
+                                        <option value="">Pilih Modis</option>
+                                    </select>
+                                </div>
+                                
+                                <div>
+                                    <label for="filter-shelf-start" class="block text-sm font-medium text-gray-300 mb-1">Shelf Dari :</label>
+                                    <select id="filter-shelf-start" class="w-full p-3 border-2 border-gray-700 rounded-xl glass-input text-gray-100 focus:border-cyan-500 focus:ring-1 outline-none transition duration-150">
+                                        <option value="">Pilih Shelf Awal</option>
+                                    </select>
+                                </div>
                             </div>
                             
-                            <div>
-                                <label for="filter-shelf-start" class="block text-sm font-medium text-gray-300 mb-1">Shelf Dari :</label>
-                                <select id="filter-shelf-start" class="w-full p-3 border-2 border-gray-700 rounded-xl glass-input text-gray-100 focus:border-emerald-500 focus:ring-1 outline-none transition duration-150">
-                                    <option value="">Pilih Shelf Awal</option>
-                                </select>
-                            </div>
-                        </div>
-                        
-                        <div class="grid grid-cols-2 gap-4"> 
-                            <div>
-                                <label for="filter-shelf-end" class="block text-sm font-medium text-gray-300 mb-1">Shelf Sampai :</label>
-                                <select id="filter-shelf-end" class="w-full p-3 border-2 border-gray-700 rounded-xl glass-input text-gray-100 focus:border-emerald-500 focus:ring-1 outline-none transition duration-150">
-                                    <option value="">Pilih Shelf Akhir</option>
-                                </select>
-                            </div>
-                        
-                            <div>
-                                <label for="filter-auto-slide" class="block text-sm font-medium text-gray-300 mb-1">Geser Otomatis :</label>
-                                <select id="filter-auto-slide" class="w-full p-3 border-2 border-gray-700 rounded-xl glass-input text-gray-100 focus:border-emerald-500 focus:ring-1 outline-none transition duration-150">
-                                    <option value="0" selected>0 Detik</option>
-                                    <option value="1000">1 Detik</option>
-                                    <option value="2000">2 Detik</option>
-                                    <option value="3000">3 Detik</option>
-                                    <option value="4000">4 Detik</option>
-                                    <option value="5000">5 Detik</option>
-                                </select>
+                            <div class="grid grid-cols-2 gap-4"> 
+                                <div>
+                                    <label for="filter-shelf-end" class="block text-sm font-medium text-gray-300 mb-1">Shelf Sampai :</label>
+                                    <select id="filter-shelf-end" class="w-full p-3 border-2 border-gray-700 rounded-xl glass-input text-gray-100 focus:border-cyan-500 focus:ring-1 outline-none transition duration-150">
+                                        <option value="">Pilih Shelf Akhir</option>
+                                    </select>
+                                </div>
+                            
+                                <div>
+                                    <label for="filter-auto-slide" class="block text-sm font-medium text-gray-300 mb-1">Geser Otomatis :</label>
+                                    <select id="filter-auto-slide" class="w-full p-3 border-2 border-gray-700 rounded-xl glass-input text-gray-100 focus:border-cyan-500 focus:ring-1 outline-none transition duration-150">
+                                        <option value="0" selected>0 Detik</option>
+                                        <option value="1000">1 Detik</option>
+                                        <option value="2000">2 Detik</option>
+                                        <option value="3000">3 Detik</option>
+                                        <option value="4000">4 Detik</option>
+                                        <option value="5000">5 Detik</option>
+                                    </select>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            
-            <div id="search-button-area" class="flex flex-row space-x-4 mb-6"> 
-                 <button 
-                    id="search-button" 
-                    onclick="handleSearch()"
-                    class="w-1/2 glass-button-base glass-emerald py-3 px-8 rounded-xl shadow-lg transition duration-200 ease-in-out transform hover:scale-[1.005] active:scale-[0.99] focus:ring-4 focus:ring-emerald-300 focus:ring-offset-2 flex items-center justify-center space-x-2"
-                    >
-                    <i data-lucide="scan-line" class="h-5 w-5"></i>
-                    <span>PROSES</span>
-                </button>
-                
-                 <button 
-                    id="reset-button" 
-                    onclick="resetAll()"
-                    class="w-1/2 glass-button-base glass-gray py-3 px-8 rounded-xl shadow-lg transition duration-200 ease-in-out transform hover:scale-[1.005] active:scale-[0.99] focus:ring-4 focus:ring-gray-300 focus:ring-offset-2 flex items-center justify-center space-x-2"
-                    >
-                    <i data-lucide="rotate-ccw" class="h-5 w-5"></i>
-                    <span>RESET</span>
-                </button>
-            </div>
+                <div id="search-button-area" class="flex flex-row space-x-4 mb-6 hidden w-full"> 
+                     <button 
+                        id="search-button" 
+                        onclick="handleSearch()"
+                        class="w-1/2 glass-button-base glass-main-button py-3 px-8 rounded-xl shadow-lg transition duration-200 ease-in-out transform hover:scale-[1.005] active:scale-[0.99] focus:ring-4 focus:ring-indigo-300 focus:ring-offset-2 flex items-center justify-center space-x-2"
+                        >
+                        <i data-lucide="scan-line" class="h-5 w-5"></i>
+                        <span>PROSES</span>
+                    </button>
+                    
+                     <button 
+                        id="reset-button" 
+                        onclick="resetAll()"
+                        class="w-1/2 glass-button-base glass-menu-button py-3 px-8 rounded-xl shadow-lg transition duration-200 ease-in-out transform hover:scale-[1.005] active:scale-[0.99] focus:ring-4 focus:ring-teal-300 focus:ring-offset-2 flex items-center justify-center space-x-2"
+                        >
+                        <i data-lucide="menu" class="h-5 w-5"></i>
+                        <span>MENU</span>
+                    </button>
+                </div>
+                 </div>
             
         </div> 
-
-        <footer class="w-full max-w-xl lg:max-w-3xl text-center text-gray-400 text-xs sm:text-sm font-medium px-4 sm:px-8 py-1 z-10 relative">
-            ~ Made With 🖤 By M.H.R ~
-            <div id="timestamp" class="text-xs text-gray-500 mt-1 font-normal"></div>
-        </footer>
-        
     </div> 
+    
+    <footer id="main-footer" class="w-full text-center text-gray-400 text-xs sm:text-sm font-medium px-4 sm:px-8 py-1 z-10 fixed bottom-0 left-0 right-0 bg-black bg-opacity-70 backdrop-blur-sm">
+        ~ Made With 🖤 By M.H.R ~
+        <div id="timestamp" class="text-xs text-gray-500 mt-1 font-normal"></div>
+    </footer>
     
     <div id="close-btn-top" class="hidden">
         <button id="close-button-main" onclick="closeModal()" 
@@ -458,14 +672,14 @@
                 
                 <div id="modal-navigation" class="flex items-center justify-center w-full sm:w-auto">
                     <button id="prev-button" onclick="navigateResult(-1)" 
-                            class="hidden p-2 glass-circle rounded-full transition duration-150 focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed">
+                            class="hidden p-2 glass-circle rounded-full transition duration-150 focus:outline-none focus:ring-2 focus:ring-cyan-500 disabled:opacity-50 disabled:cursor-not-allowed">
                          <i data-lucide="chevron-left" class="h-5 w-5 text-gray-800"></i> </button>
                     
                     <p id="nav-status" class="text-sm font-semibold mx-3 sm:mx-4 text-gray-100 hidden">
                     </p>
                     
                     <button id="next-button" onclick="navigateResult(1)" 
-                            class="hidden p-2 glass-circle rounded-full transition duration-150 focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed">
+                            class="hidden p-2 glass-circle rounded-full transition duration-150 focus:outline-none focus:ring-2 focus:ring-cyan-500 disabled:opacity-50 disabled:cursor-not-allowed">
                          <i data-lucide="chevron-right" class="h-5 w-5 text-gray-800"></i> </button>
                 </div>
                 
@@ -479,8 +693,12 @@
         let globalData = [];
         let currentResults = []; 
         let currentIndex = 0;    
+        let currentMenu = null;
         
         const searchInput = document.getElementById('search-input');
+        const searchInputContainer = document.getElementById('search-input-container');
+        const ittFiltersDiv = document.getElementById('itt-filters');
+        const searchButtonArea = document.getElementById('search-button-area');
         const resultModalDiv = document.getElementById('result-modal'); 
         const modalCardContentDiv = document.getElementById('modal-card-content');
         const prevButton = document.getElementById('prev-button');
@@ -488,6 +706,11 @@
         const navStatus = document.getElementById('nav-status');
         const closeBtnTop = document.getElementById('close-btn-top'); 
         
+        const menuSelectionDiv = document.getElementById('menu-selection');
+        const mainHeaderTitle = document.getElementById('main-header-title');
+        const contentArea = document.getElementById('content-area');
+        const mainContainer = document.getElementById('main-container');
+
         const filterModis = document.getElementById('filter-modis');
         const filterShelfStart = document.getElementById('filter-shelf-start');
         const filterShelfEnd = document.getElementById('filter-shelf-end');
@@ -498,72 +721,10 @@
         
         const timestampDiv = document.getElementById('timestamp');
 
-        const canvas = document.getElementById('matrix-canvas');
-        const ctx = canvas.getContext('2d');
-
-        let width = canvas.width = window.innerWidth;
-        let height = canvas.height = window.innerHeight;
-
-        const characters = '01x'
-        
-        const font_size = 14; 
-        let columns = Math.floor(width / font_size);
-        const drops = [];
-
-        for (let i = 0; i < columns; i++) {
-            drops[i] = 1; 
-        }
-
         let autoNavigateInterval = null; 
-
-        function drawMatrix() {
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.04)'; 
-            ctx.fillRect(0, 0, width, height);
-
-            ctx.fillStyle = '#0C6'; 
-            ctx.font = font_size + 'px monospace';
-
-            for (let i = 0; i < drops.length; i++) {
-                const text = characters[Math.floor(Math.random() * characters.length)];
-                
-                const x = i * font_size;
-                const y = drops[i] * font_size;
-                ctx.fillText(text, x, y);
-
-                if (drops[i] * font_size > height && Math.random() > 0.975) {
-                    drops[i] = 0;
-                }
-
-                drops[i]++;
-            }
-        }
-        
-        window.addEventListener('resize', () => {
-            width = canvas.width = window.innerWidth;
-            height = canvas.height = window.innerHeight;
-            columns = Math.floor(width / font_size);
-            drops.length = columns; 
-            for (let i = 0; i < columns; i++) {
-                if (drops[i] === undefined) {
-                    drops[i] = 1;
-                }
-            }
-        });
-
-        let interval = setInterval(drawMatrix, 50); 
-
 
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
-            
-            width = canvas.width = window.innerWidth;
-            height = canvas.height = window.innerHeight;
-            columns = Math.floor(width / font_size);
-            if(drops.length < columns) {
-                for (let i = drops.length; i < columns; i++) {
-                   drops[i] = 1; 
-                }
-            }
             
             setInterval(updateTimestamp, 1000);
             updateTimestamp();
@@ -583,13 +744,66 @@
             filterAutoSlide.addEventListener('change', () => {
                  clearDisplayAndFocus(); 
                  stopAutoNavigation(); 
-                 if (filterAutoSlide.value !== '0') {
-                     showSwalToast('info', 'Pilihan Geser Otomatis diubah. Tekan CARI DATA untuk mengaktifkannya.');
-                 }
             });
             
             fetchAndInitializeData();
         });
+
+        function clearInputsAndFilters() {
+            searchInput.value = '';
+            filterModis.value = '';
+            filterShelfStart.value = '';
+            filterShelfEnd.value = '';
+            displayBarcodeRadio.checked = true;
+            filterAutoSlide.value = '0'; 
+            stopAutoNavigation();
+            clearDisplayAndFocus();
+        }
+
+        window.selectMenu = function(menu) {
+            currentMenu = menu;
+            
+            let newTitle = '';
+            if (menu === 'barcode-modis') {
+                newTitle = 'CARI BARCODE / MODIS';
+            } else if (menu === 'harga-promo') {
+                newTitle = 'CARI HARGA / PROMOSI';
+            } else if (menu === 'scan-itt') {
+                newTitle = 'SCAN ITT WDCP / PDA';
+            }
+            
+            mainHeaderTitle.textContent = newTitle;
+            
+            menuSelectionDiv.classList.add('fade-out-down');
+            mainContainer.classList.remove('menu-active'); 
+            
+            setTimeout(() => {
+                menuSelectionDiv.classList.add('hidden');
+                menuSelectionDiv.classList.remove('fade-out-down', 'fade-in-up');
+                
+                document.querySelectorAll('.glass-main-button').forEach(btn => btn.classList.remove('active'));
+                const activeBtn = document.getElementById(`menu-${menu}`);
+                if (activeBtn) activeBtn.classList.add('active');
+                
+                searchInputContainer.classList.add('hidden');
+                ittFiltersDiv.classList.add('hidden');
+                searchButtonArea.classList.remove('hidden'); 
+                
+                if (menu === 'barcode-modis' || menu === 'harga-promo') {
+                    searchInputContainer.classList.remove('hidden');
+                } else if (menu === 'scan-itt') {
+                    ittFiltersDiv.classList.remove('hidden');
+                }
+                
+                contentArea.classList.remove('fade-out-down');
+                contentArea.classList.add('fade-in-up');
+                
+                clearInputsAndFilters();
+                
+                document.getElementById('search-button').querySelector('span').textContent = 'PROSES';
+                
+            }, 300); 
+        }
 
         function getSwalMixin(isToast = false) {
              const baseConfig = {
@@ -597,7 +811,7 @@
                     popup: 'glass-swal' 
                 },
                 buttonsStyling: false, 
-                confirmButtonButtonClass: 'glass-button-base glass-emerald py-2 px-4 rounded-xl shadow-md transition duration-150',
+                confirmButtonButtonClass: 'glass-button-base glass-main-button py-2 px-4 rounded-xl shadow-md transition duration-150',
                 cancelButtonClass: 'glass-button-base glass-gray py-2 px-4 rounded-xl shadow-md transition duration-150',
                 showClass: {
                     popup: 'animate__animated animate__fadeInDown'
@@ -635,15 +849,6 @@
             });
         }
         
-        function showSwalToast(icon, title) {
-            const Toast = getSwalMixin(true);
-
-            Toast.fire({
-                icon: icon,
-                title: title
-            });
-        }
-
         function updateTimestamp() {
             const now = new Date();
             
@@ -665,22 +870,30 @@
             timestampDiv.textContent = finalFormat;
         }
 
-        function resetAll() {
-            searchInput.value = '';
-            
-            filterModis.value = '';
-            filterShelfStart.value = '';
-            filterShelfEnd.value = '';
-            
-            displayBarcodeRadio.checked = true;
-            filterAutoSlide.value = '0'; 
-
+        window.resetAll = function(showToast = false) {
+            clearInputsAndFilters();
             stopAutoNavigation();
-            clearDisplayAndFocus();
+            instantCloseModal();
             
-            showSwalToast('info', 'Input dan Filter berhasil di-RESET!');
+            contentArea.classList.add('fade-out-down');
             
-            searchInput.focus();
+            setTimeout(() => {
+                contentArea.classList.remove('fade-out-down', 'fade-in-up');
+                searchInputContainer.classList.add('hidden');
+                ittFiltersDiv.classList.add('hidden');
+                searchButtonArea.classList.add('hidden'); 
+
+                mainHeaderTitle.textContent = 'INDEKS PROGRAM';
+                
+                currentMenu = null;
+                menuSelectionDiv.classList.remove('hidden');
+                menuSelectionDiv.classList.add('fade-in-up');
+                mainContainer.classList.add('menu-active'); 
+                
+                document.querySelectorAll('.glass-main-button').forEach(btn => btn.classList.remove('active'));
+                
+                searchInput.focus();
+            }, 300);
         }
 
         function populateIttFilters() {
@@ -789,8 +1002,6 @@
                         navigateResult(1);
                     }
                 }, delayInMs);
-                
-                showSwalToast('info', `Geser Otomatis Aktif (${delayInMs/1000} detik)`);
             } else if (delayInMs === 0) {
             }
         }
@@ -843,17 +1054,13 @@
                 return 0; 
             });
             
-            if (currentResults.length === 1) {
-                 showSwalToast('success', '1 Data ditemukan!');
-            } else {
-                 showSwalToast('success', `${currentResults.length} Data ditemukan!`);
-            }
-
 
             currentIndex = 0;
             updateModalContent(0);
             
-            startAutoNavigation(); 
+            if (currentMenu === 'scan-itt') {
+                 startAutoNavigation(); 
+            }
             
             resultModalDiv.classList.remove('hidden');
             closeBtnTop.classList.remove('hidden'); 
@@ -903,6 +1110,17 @@
             }
         }
 
+        function getDisplayProperties(menu) {
+             const base = ['DESC2', 'PLU']; 
+             if (menu === 'barcode-modis') {
+                 return [...base, 'BARCD', 'NAMA_RAK', 'NOSHELF', 'KIRIKANAN'];
+             } else if (menu === 'harga-promo') {
+                 return [...base, 'PRICE', 'PROMO']; 
+             } else if (menu === 'scan-itt') {
+                 return [...base, 'BARCD']; 
+             }
+             return [];
+        }
 
         function updateModalContent(direction = 0) {
             const item = currentResults[currentIndex];
@@ -911,10 +1129,13 @@
             const displayType = document.querySelector('input[name="displayType"]:checked').value;
             const isBarcodeDisplay = displayType === 'barcode';
             
+            const propertiesToDisplay = getDisplayProperties(currentMenu);
+            
             let normalContentHtml = []; 
             let promoHtml = '';
             let barcodeHtml = ''; 
             let priceHtml = ''; 
+            let locationHtml = '';
             const cardId = `modal-item-${currentIndex}`; 
             
             const barcodesToRender = [];
@@ -932,7 +1153,7 @@
             
             const propertyOrder = ['DESC2', 'PLU', 'PRICE', 'BARCD', 'NAMA_RAK', 'NOSHELF', 'KIRIKANAN', 'PROMO'];
 
-            const displayKeys = Object.keys(item).sort((a, b) => {
+            const displayKeys = propertiesToDisplay.sort((a, b) => {
                  const aIndex = propertyOrder.indexOf(a);
                  const bIndex = propertyOrder.indexOf(b);
                  
@@ -949,6 +1170,7 @@
             const headerHtml = `
                 <div class="text-center mb-4 pb-2 border-b border-gray-300"> 
                     <h3 class="text-xl font-extrabold">${productTitle}</h3> 
+                    <p class="text-gray-400 text-sm font-medium mt-1">PLU: ${pluValue || '-'}</p>
                 </div>
             `;
             
@@ -964,10 +1186,9 @@
                 if (key === 'DESC2' || key === 'PLU') return; 
 
                 const isBarcodeKey = key === 'BARCD'; 
-                const isShelfKey = key === 'NOSHELF';
-                const isBarisKey = key === 'KIRIKANAN';
                 const isPriceKey = key === 'PRICE';
                 const isPromoKey = key === 'PROMO';
+                const isLocationKey = key === 'NAMA_RAK' || key === 'NOSHELF' || key === 'KIRIKANAN';
 
                 if (isBarcodeKey) {
                     let allBarcodeValues = [];
@@ -978,15 +1199,21 @@
                     }
                     
                     if (allBarcodeValues.length > 0) {
-                        const visibleBarcodes = allBarcodeValues.slice(0, 1);
-                        const hiddenBarcodes = allBarcodeValues.slice(1);
+                        
+                        let barcodesToShow = allBarcodeValues;
+                        let barcodesToHide = [];
+                        
+                        if (allBarcodeValues.length > 1) { 
+                             barcodesToShow = allBarcodeValues.slice(0, 1);
+                             barcodesToHide = allBarcodeValues.slice(1);
+                        }
+                        
                         const hiddenDivId = `hidden-barcodes-container-${currentIndex}`;
                         const toggleButtonId = `toggle-barcodes-btn-${currentIndex}`;
                         
-                        let currentBarcodeHtml = `<div class="mb-4 p-4 barcode-section rounded-xl shadow-md text-center"> 
-                            <h4 class="text-xl font-bold mb-2">${pluValue}</h4> `; 
+                        let currentBarcodeHtml = `<div class="mb-4 p-4 barcode-section rounded-xl shadow-md text-center"> `; 
                         
-                        visibleBarcodes.forEach((barcodeValue, index) => {
+                        barcodesToShow.forEach((barcodeValue, index) => {
                             const uniqueElementId = `${elementId}-${index}`; 
                             
                             barcodesToRender.push({ id: uniqueElementId, value: barcodeValue, isBarcode: isBarcodeDisplay });
@@ -994,32 +1221,30 @@
                             currentBarcodeHtml += `
                                 <div class="mt-3 pt-3 border-t border-gray-300 first:border-t-0 first:mt-0"> 
                                     <div id="${uniqueElementId}" data-barcode-value="${barcodeValue}" class="${isBarcodeDisplay ? 'w-full h-14' : 'qrcode-container'}"></div>
-                                    <div class="qrcode-label mt-1">${barcodeValue}</div>
+                                    <div class="qrcode-label mt-1 text-gray-700">${barcodeValue}</div>
+                                </div>
+                            `;
+                        });
+                        
+                        if (barcodesToHide.length > 0) { 
+                            currentBarcodeHtml += `
+                                <div class="text-center mt-3">
+                                    <button id="${toggleButtonId}" onclick="toggleHiddenBarcodes('${hiddenDivId}', '${toggleButtonId}')" 
+                                            class="px-3 py-1.5 text-xs font-semibold bg-cyan-100 text-cyan-700 hover:bg-cyan-200 rounded-lg transition duration-150 flex items-center justify-center mx-auto">
+                                        <i data-lucide="chevrons-down" class="h-4 w-4 mr-1"></i> Tampilkan ${barcodesToHide.length} Barcode Lain
+                                    </button>
                                 </div>
                             `;
                             
-                            if (hiddenBarcodes.length > 0) {
-                                currentBarcodeHtml += `
-                                    <div class="text-center mt-3">
-                                        <button id="${toggleButtonId}" onclick="toggleHiddenBarcodes('${hiddenDivId}', '${toggleButtonId}')" 
-                                                class="px-3 py-1.5 text-xs font-semibold bg-emerald-100 text-emerald-700 hover:bg-emerald-200 rounded-lg transition duration-150 flex items-center justify-center mx-auto">
-                                            <i data-lucide="chevrons-down" class="h-4 w-4 mr-1"></i> Tampilkan ${hiddenBarcodes.length} Barcode Lain
-                                        </button>
-                                    </div>
-                                `;
-                            }
-                        });
-                        
-                        if (hiddenBarcodes.length > 0) {
                             currentBarcodeHtml += `<div id="${hiddenDivId}" class="hidden-barcodes">`;
-                            hiddenBarcodes.forEach((barcodeValue, index) => {
-                                const uniqueElementId = `${elementId}-${1 + index}`; 
+                            barcodesToHide.forEach((barcodeValue, index) => {
+                                const uniqueElementId = `${elementId}-${barcodesToShow.length + index}`; 
                                 barcodesToRender.push({ id: uniqueElementId, value: barcodeValue, isBarcode: isBarcodeDisplay });
                                 
                                 currentBarcodeHtml += `
                                     <div class="mt-3 pt-3 border-t border-gray-300"> 
                                         <div id="${uniqueElementId}" data-barcode-value="${barcodeValue}" class="${isBarcodeDisplay ? 'w-full h-14' : 'qrcode-container'}"></div>
-                                        <div class="qrcode-label mt-1">${barcodeValue}</div>
+                                        <div class="qrcode-label mt-1 text-gray-700">${barcodeValue}</div>
                                     </div>
                                 `;
                             });
@@ -1029,7 +1254,7 @@
                         currentBarcodeHtml += `</div>`;
                         barcodeHtml = currentBarcodeHtml; 
                         return; 
-                    } else {
+                    } else if (propertiesToDisplay.includes('BARCD')) {
                         normalContentHtml.push(`
                             <div class="flex flex-col sm:flex-row items-start text-sm border-b border-gray-300 py-2 text-red-400"> 
                                 <span class="property-key mr-2 font-bold">BARCODE:</span> 
@@ -1040,22 +1265,49 @@
                     }
                 } 
                 
-                if (isShelfKey || isBarisKey || key === 'NAMA_RAK') {
+                if (isLocationKey) {
+                    if (currentMenu === 'scan-itt') {
+                        return; 
+                    }
+                    
+                    const itemModis = item.NAMA_RAK || '-';
+                    const itemShelf = item.NOSHELF || '-';
+                    const itemBaris = item.KIRIKANAN || '-';
+                    
+                    locationHtml = `
+                        <div class="border-b border-gray-200 py-2 text-center">
+                            <div class="mb-3"> 
+                                <span class="property-key block w-auto min-w-0 mx-auto text-center">MODIS :</span> 
+                                <span class="block break-words text-gray-700 font-bold text-base">${itemModis}</span> 
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-4 border-t border-gray-200 pt-3">
+                                <div class="flex flex-col text-sm border-r border-gray-200 pr-4 items-center">
+                                    <span class="property-key w-auto min-w-0">SHELF :</span> 
+                                    <span class="break-words text-gray-700 font-bold text-sm">${itemShelf}</span>
+                                </div>
+                                <div class="flex flex-col text-sm items-center">
+                                    <span class="property-key w-auto min-w-0">BARIS :</span> 
+                                    <span class="break-words text-gray-700 font-bold text-sm">${itemBaris}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
                     return; 
                 }
 
-                if (isPriceKey) {
+                if (isPriceKey && currentMenu === 'harga-promo') {
                     const formattedPrice = formatToIDR(value);
                     priceHtml = `
                         <div class="py-3 text-center bg-gray-800 bg-opacity-30 rounded-lg my-3">
                             <span class="text-base font-semibold text-gray-300 block">HARGA NORMAL :</span>
-                            <span class="block text-3xl font-extrabold text-emerald-400 tracking-wider">${formattedPrice}</span>
+                            <span class="block text-3xl font-extrabold text-cyan-400 tracking-wider">${formattedPrice}</span>
                         </div>
                     `;
                     return;
                 }
                 
-                if (isPromoKey) {
+                if (isPromoKey && currentMenu === 'harga-promo') {
                     let promoContent = '';
                     const now = new Date(); 
                     
@@ -1125,31 +1377,6 @@
                 }
             });
             
-            const itemModis = item.NAMA_RAK || '-';
-            const itemShelf = item.NOSHELF || '-';
-            const itemBaris = item.KIRIKANAN || '-';
-            
-            const shelfLocationHtml = `
-                <div class="border-b border-gray-200 py-2 text-center">
-                    <div class="mb-3"> 
-                        <span class="property-key block w-auto min-w-0 mx-auto text-center">MODIS :</span> 
-                        <span class="block break-words text-gray-700 font-bold text-base">${itemModis}</span> 
-                    </div>
-                    
-                    <div class="grid grid-cols-2 gap-4 border-t border-gray-200 pt-3">
-                        <div class="flex flex-col text-sm border-r border-gray-200 pr-4 items-center">
-                            <span class="property-key w-auto min-w-0">SHELF :</span> 
-                            <span class="break-words text-gray-700 font-bold text-sm">${itemShelf}</span>
-                        </div>
-                        <div class="flex flex-col text-sm items-center">
-                            <span class="property-key w-auto min-w-0">BARIS :</span> 
-                            <span class="break-words text-gray-700 font-bold text-sm">${itemBaris}</span>
-                        </div>
-                    </div>
-                </div>
-            `;
-
-
             const otherPropertiesHtml = normalContentHtml.length > 0 ? `
                  <div class="pt-4 mt-2 border-t border-gray-300">
                      <h4 class="text-lg font-bold text-gray-300 mb-2">DETAIL LAIN:</h4>
@@ -1159,24 +1386,16 @@
                  </div>
              ` : '';
 
-            const finalContentHtml = `
-                ${headerHtml}
-                ${barcodeHtml}
-                
-                <div class="border-t pt-4 border-gray-300 mt-4">
-                
-                    ${shelfLocationHtml} 
-
-                    <div class="pt-3 border-t border-gray-300">
-                        ${priceHtml} 
-                    </div>
-
-                    ${promoHtml ? `<div class="pt-3 border-t border-gray-300">${promoHtml}</div>` : ''} 
-                    
-                    ${otherPropertiesHtml}
-                </div>
-            `;
-
+            let finalContentHtml = headerHtml + barcodeHtml;
+            
+            if (currentMenu === 'barcode-modis') {
+                finalContentHtml += `<div class="border-t pt-4 border-gray-300 mt-4">${locationHtml}${otherPropertiesHtml}</div>`;
+            } else if (currentMenu === 'harga-promo') {
+                finalContentHtml += `<div class="border-t pt-4 border-gray-300 mt-4">${priceHtml}${promoHtml ? `<div class="pt-3 border-t border-gray-300">${promoHtml}</div>` : ''}${otherPropertiesHtml}</div>`;
+            } else if (currentMenu === 'scan-itt') {
+                 finalContentHtml += otherPropertiesHtml.length > 0 ? `<div class="border-t pt-4 border-gray-300 mt-4">${otherPropertiesHtml}</div>` : ''; 
+            }
+            
 
             modalCardContentDiv.classList.remove('content-leaving', 'content-entering'); 
             
@@ -1232,8 +1451,13 @@
         }
 
 
-        function handleSearch() {
+        window.handleSearch = function() {
             instantCloseModal(); 
+            
+            if (!currentMenu) {
+                showSwal('warning', 'Peringatan', 'Harap pilih salah satu menu terlebih dahulu.');
+                return;
+            }
             
             const searchTerm = searchInput.value.toLowerCase().trim();
             
@@ -1249,25 +1473,29 @@
                  showSwal('error', 'Data belum dimuat!', 'Silakan coba muat ulang halaman atau periksa koneksi internet.');
                  return;
             }
-
-            if (searchTerm.length === 0 && !selectedModis && selectedShelfStartValue === "" && selectedShelfEndValue === "") {
-                showSwal('warning', 'Peringatan Pencarian', 'Harap masukkan kata kunci atau pilih filter untuk mencari.');
-                return; 
+            
+            let isSearchNeeded = true;
+            if (currentMenu === 'scan-itt') {
+                 isSearchNeeded = false;
+                 if (!selectedModis && selectedShelfStartValue === "" && selectedShelfEndValue === "") {
+                    showSwal('warning', 'Peringatan Filter', 'Harap pilih minimal satu filter (Modis atau Shelf) untuk Scan ITT.');
+                    return; 
+                 }
+            } else if (searchTerm.length === 0) {
+                 showSwal('warning', 'Peringatan Pencarian', 'Harap masukkan kata kunci untuk mencari.');
+                 return; 
             }
 
             const dataToDisplay = globalData.filter(item => {
                 let passesTextSearch = true;
-                let passesModisFilter = true;
-                let passesShelfFilter = true;
-                
-                if (searchTerm.length > 0) {
+                if (isSearchNeeded) {
                     passesTextSearch = false; 
                     for (const key in item) {
                         if (item.hasOwnProperty(key)) {
                             let value = item[key];
                             
                             if (key === 'BARCD' && Array.isArray(value)) {
-                                if (value.some(barcd => String(barcd).toLowerCase().includes(searchTerm))) {
+                                if (value.some(barcd => String(barcd || '').toLowerCase().includes(searchTerm))) {
                                     passesTextSearch = true;
                                     break;
                                 }
@@ -1290,18 +1518,20 @@
                     }
                 }
                 
+                let passesModisFilter = true;
                 if (selectedModis) {
                     const itemModis = String(item.NAMA_RAK || '').trim();
                     passesModisFilter = (itemModis === selectedModis);
                 }
                 
+                let passesShelfFilter = true;
                 const isShelfFilterActive = selectedShelfStartValue !== "" || selectedShelfEndValue !== "";
 
                 if (isShelfFilterActive) {
                     const itemShelf = item.NOSHELF ? parseInt(item.NOSHELF) : NaN;
                     
                     if (isNaN(itemShelf)) {
-                        passesShelfFilter = !selectedShelfStartValue && !selectedShelfEndValue;
+                        passesShelfFilter = false;
                     } else {
                         const start = isNaN(selectedShelfStart) ? -Infinity : selectedShelfStart;
                         const end = isNaN(selectedShelfEnd) ? Infinity : selectedShelfEnd;
@@ -1310,8 +1540,11 @@
                     }
                 }
 
-
-                return passesTextSearch && passesModisFilter && passesShelfFilter;
+                if (currentMenu === 'scan-itt') {
+                    return passesModisFilter && passesShelfFilter;
+                } else {
+                    return passesTextSearch; 
+                }
             });
 
             displayResultsInModal(dataToDisplay);
@@ -1344,7 +1577,6 @@
                 populateIttFilters(); 
                 
                 Swal.close(); 
-                showSwalToast('success', 'Data berhasil dimuat!'); 
 
             } catch (error) {
                 
