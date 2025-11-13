@@ -190,6 +190,10 @@
         .modal-content .text-red-400 {
             color: #f87171 !important; 
         }
+
+        .modal-content .text-yellow-400 {
+            color: #facc15 !important; 
+        }
         
         .barcode-section {
             background-color: #ffffff; 
@@ -471,7 +475,7 @@
     </div>
     
     <script>
-        const JSON_URL = 'https://raw.githubusercontent.com/IndoMarc/DATA/refs/heads/main/13-11-2025.json';
+        const JSON_URL = 'https://raw.githubusercontent.com/IndoMarc/DATA/refs/heads/main/14-11-2025.json';
         let globalData = [];
         let currentResults = []; 
         let currentIndex = 0;    
@@ -593,7 +597,7 @@
                     popup: 'glass-swal' 
                 },
                 buttonsStyling: false, 
-                confirmButtonClass: 'glass-button-base glass-emerald py-2 px-4 rounded-xl shadow-md transition duration-150',
+                confirmButtonButtonClass: 'glass-button-base glass-emerald py-2 px-4 rounded-xl shadow-md transition duration-150',
                 cancelButtonClass: 'glass-button-base glass-gray py-2 px-4 rounded-xl shadow-md transition duration-150',
                 showClass: {
                     popup: 'animate__animated animate__fadeInDown'
@@ -797,6 +801,13 @@
                 autoNavigateInterval = null;
             }
         }
+        
+        function parseDateFromFormat(dateString) {
+            const parts = dateString.match(/(\d{2})\/(\d{2})\/(\d{4}) (\d{2}):(\d{2}):(\d{2})/);
+            if (!parts) return null;
+
+            return new Date(parts[3], parts[2] - 1, parts[1], parts[4], parts[5], parts[6]);
+        }
 
         function displayResultsInModal(items) {
             currentResults = items;
@@ -901,8 +912,9 @@
             const isBarcodeDisplay = displayType === 'barcode';
             
             let normalContentHtml = []; 
-            let priceHtml = ''; 
+            let promoHtml = '';
             let barcodeHtml = ''; 
+            let priceHtml = ''; 
             const cardId = `modal-item-${currentIndex}`; 
             
             const barcodesToRender = [];
@@ -910,14 +922,15 @@
             const keyMap = {
                 'DESC2': 'NAMA PRODUK', 
                 'PLU': 'PLU',
-                'PRICE': 'HARGA NORMAL', 
                 'NAMA_RAK': 'MODIS',
                 'NOSHELF': 'SHELF',
                 'KIRIKANAN': 'BARIS',
-                'BARCD': 'BARCODE' 
+                'BARCD': 'BARCODE',
+                'PRICE': 'HARGA NORMAL',
+                'PROMO': 'PROMO SAAT INI'
             };
             
-            const propertyOrder = ['DESC2', 'PLU', 'BARCD', 'NAMA_RAK', 'NOSHELF', 'KIRIKANAN', 'PRICE'];
+            const propertyOrder = ['DESC2', 'PLU', 'PRICE', 'BARCD', 'NAMA_RAK', 'NOSHELF', 'KIRIKANAN', 'PROMO'];
 
             const displayKeys = Object.keys(item).sort((a, b) => {
                  const aIndex = propertyOrder.indexOf(a);
@@ -953,6 +966,8 @@
                 const isBarcodeKey = key === 'BARCD'; 
                 const isShelfKey = key === 'NOSHELF';
                 const isBarisKey = key === 'KIRIKANAN';
+                const isPriceKey = key === 'PRICE';
+                const isPromoKey = key === 'PROMO';
 
                 if (isBarcodeKey) {
                     let allBarcodeValues = [];
@@ -1029,41 +1044,84 @@
                     return; 
                 }
 
+                if (isPriceKey) {
+                    const formattedPrice = formatToIDR(value);
+                    priceHtml = `
+                        <div class="py-3 text-center bg-gray-800 bg-opacity-30 rounded-lg my-3">
+                            <span class="text-base font-semibold text-gray-300 block">HARGA NORMAL :</span>
+                            <span class="block text-3xl font-extrabold text-emerald-400 tracking-wider">${formattedPrice}</span>
+                        </div>
+                    `;
+                    return;
+                }
                 
-                let displayValue = String(value);
-                let valueClass = 'font-medium text-gray-700'; 
-                let isPrice = false;
+                if (isPromoKey) {
+                    let promoContent = '';
+                    const now = new Date(); 
+                    
+                    const activePromos = Array.isArray(value) ? value.filter(promo => {
+                        const tglAwalStr = promo.TANGGALAWAL;
+                        const tglAkhirStr = promo.TANGGALAKHIR;
+                        
+                        if (!tglAwalStr || !tglAkhirStr) {
+                             return true; 
+                        }
+                        
+                        const tglAwal = parseDateFromFormat(tglAwalStr);
+                        const tglAkhir = parseDateFromFormat(tglAkhirStr);
+                        
+                        if (!tglAwal || !tglAkhir) {
+                            return false; 
+                        }
+                        
+                        return now >= tglAwal && now < tglAkhir;
+                        
+                    }) : [];
 
-                if (key === 'PRICE') {
-                    displayValue = formatToIDR(value);
-                    valueClass = 'text-red-400 font-extrabold text-3xl'; 
-                    isPrice = true;
+                    if (activePromos.length > 0) {
+                        promoContent = activePromos.map((promo, index) => {
+                             const mechanism = promo.MEKANISME || 'Mekanisme tidak tersedia';
+                             const tglAwal = promo.TANGGALAWAL || '-';
+                             const tglAkhir = promo.TANGGALAKHIR || '-';
+                             
+                             return `<div class="p-2 mt-2 rounded-lg border border-yellow-500 bg-yellow-900 bg-opacity-30 text-left">
+                                         <p class="text-sm font-bold text-yellow-300">PROMO AKTIF ${index + 1} :</p>
+                                         <p class="text-base font-semibold text-yellow-100 mt-1 break-words">${mechanism}</p>
+                                         <p class="text-xs text-yellow-200 mt-1">Periode: ${tglAwal} s/d ${tglAkhir}</p>
+                                     </div>`;
+                        }).join('');
+                        
+                        currentHtml = `
+                            <div class="py-2 text-center">
+                                <span class="text-lg font-semibold text-gray-300 block">PROMO SAAT INI :</span>
+                                ${promoContent} 
+                            </div>
+                        `;
+                        
+                    } else {
+                        currentHtml = `
+                            <div class="py-2 text-center">
+                                <span class="text-lg font-semibold text-gray-300 block">PROMO SAAT INI :</span>
+                                <span class="block font-semibold text-gray-500 text-lg mt-1">Tidak Ada Promo Aktif</span>
+                            </div>
+                        `;
+                    }
+                    promoHtml = currentHtml;
+                    return;
+
                 } else {
                     displayValue = (typeof value === 'object' && value !== null)
                         ? `<pre class="bg-gray-800 bg-opacity-50 p-2 rounded text-xs overflow-x-auto mt-1 text-gray-100">${JSON.stringify(value, null, 2)}</pre>` 
                         : String(value);
                     valueClass = 'font-medium text-sm text-gray-700'; 
-                }
-                
-                let currentHtml;
-                
-                if (isPrice) {
                     currentHtml = `
-                        <div class="flex items-center justify-center py-2"> 
-                            <span class="text-lg font-semibold text-gray-300 mr-2">HARGA NORMAL :</span> 
-                            <span class="text-2xl font-extrabold text-red-400">${displayValue}</span> 
-                        </div>
-                    `;
-                    priceHtml = currentHtml; 
-                    return;
-                } else {
-                     currentHtml = `
                         <div class="flex flex-col sm:flex-row items-start text-sm border-b border-gray-200 last:border-b-0 py-2"> 
                             <span class="property-key mr-2">${displayKey}:</span> 
                             <span class="flex-1 break-words text-gray-700 ${valueClass}">${displayValue}</span> 
                         </div>
                     `;
                     normalContentHtml.push(currentHtml); 
+                    return;
                 }
             });
             
@@ -1090,25 +1148,35 @@
                     </div>
                 </div>
             `;
-            
-            normalContentHtml.unshift(shelfLocationHtml);
 
 
-            const finalPriceHtml = priceHtml 
-                ? `<div class="mt-4 pt-4 border-t-2 border-red-500 text-center">
-                       ${priceHtml}
-                   </div>`
-                : '';
-            
-            
+            const otherPropertiesHtml = normalContentHtml.length > 0 ? `
+                 <div class="pt-4 mt-2 border-t border-gray-300">
+                     <h4 class="text-lg font-bold text-gray-300 mb-2">DETAIL LAIN:</h4>
+                      <div class="space-y-1"> 
+                         ${normalContentHtml.join('')}
+                      </div>
+                 </div>
+             ` : '';
+
             const finalContentHtml = `
                 ${headerHtml}
                 ${barcodeHtml}
-                <div class="space-y-1 border-t pt-2 border-gray-300 mt-4"> 
-                    ${normalContentHtml.join('')}
+                
+                <div class="border-t pt-4 border-gray-300 mt-4">
+                
+                    ${shelfLocationHtml} 
+
+                    <div class="pt-3 border-t border-gray-300">
+                        ${priceHtml} 
+                    </div>
+
+                    ${promoHtml ? `<div class="pt-3 border-t border-gray-300">${promoHtml}</div>` : ''} 
+                    
+                    ${otherPropertiesHtml}
                 </div>
-                ${finalPriceHtml}
             `;
+
 
             modalCardContentDiv.classList.remove('content-leaving', 'content-entering'); 
             
@@ -1170,15 +1238,19 @@
             const searchTerm = searchInput.value.toLowerCase().trim();
             
             const selectedModis = filterModis.value.trim();
-            const selectedShelfStart = parseInt(filterShelfStart.value.trim());
-            const selectedShelfEnd = parseInt(filterShelfEnd.value.trim());
+            
+            const selectedShelfStartValue = filterShelfStart.value.trim();
+            const selectedShelfEndValue = filterShelfEnd.value.trim();
+            
+            const selectedShelfStart = parseInt(selectedShelfStartValue);
+            const selectedShelfEnd = parseInt(selectedShelfEndValue);
             
             if (!globalData || globalData.length === 0) {
                  showSwal('error', 'Data belum dimuat!', 'Silakan coba muat ulang halaman atau periksa koneksi internet.');
                  return;
             }
 
-            if (searchTerm.length === 0 && !selectedModis && filterShelfStart.value.trim() === "" && filterShelfEnd.value.trim() === "") {
+            if (searchTerm.length === 0 && !selectedModis && selectedShelfStartValue === "" && selectedShelfEndValue === "") {
                 showSwal('warning', 'Peringatan Pencarian', 'Harap masukkan kata kunci atau pilih filter untuk mencari.');
                 return; 
             }
@@ -1193,14 +1265,26 @@
                     for (const key in item) {
                         if (item.hasOwnProperty(key)) {
                             let value = item[key];
-                            if (Array.isArray(value)) {
-                                value = value.join(' ');
-                            }
                             
-                            const valueLower = String(value).toLowerCase();
-                            if (valueLower.includes(searchTerm)) {
-                                passesTextSearch = true;
-                                break;
+                            if (key === 'BARCD' && Array.isArray(value)) {
+                                if (value.some(barcd => String(barcd).toLowerCase().includes(searchTerm))) {
+                                    passesTextSearch = true;
+                                    break;
+                                }
+                            } else if (key === 'PROMO' && Array.isArray(value)) {
+                                if (value.some(promo => {
+                                    const mechanism = String(promo.MEKANISME || '').toLowerCase();
+                                    return mechanism.includes(searchTerm);
+                                })) {
+                                    passesTextSearch = true;
+                                    break;
+                                }
+                            } else {
+                                const valueLower = String(value || '').toLowerCase();
+                                if (valueLower.includes(searchTerm)) {
+                                    passesTextSearch = true;
+                                    break;
+                                }
                             }
                         }
                     }
@@ -1211,13 +1295,13 @@
                     passesModisFilter = (itemModis === selectedModis);
                 }
                 
-                const isShelfFilterActive = filterShelfStart.value.trim() !== "" || filterShelfEnd.value.trim() !== "";
+                const isShelfFilterActive = selectedShelfStartValue !== "" || selectedShelfEndValue !== "";
 
-                    if (isShelfFilterActive) {
+                if (isShelfFilterActive) {
                     const itemShelf = item.NOSHELF ? parseInt(item.NOSHELF) : NaN;
                     
                     if (isNaN(itemShelf)) {
-                        passesShelfFilter = false;
+                        passesShelfFilter = !selectedShelfStartValue && !selectedShelfEndValue;
                     } else {
                         const start = isNaN(selectedShelfStart) ? -Infinity : selectedShelfStart;
                         const end = isNaN(selectedShelfEnd) ? Infinity : selectedShelfEnd;
