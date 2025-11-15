@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Indeks Program Barcode</title>
+    <title>INDOMARC</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script> 
@@ -97,6 +97,55 @@
             background-color: rgba(6, 182, 212, 0.8);
             border-color: rgba(6, 182, 212, 0.9);
             color: #ffffff;
+        }
+        
+        .menu-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 1.5rem;
+            border-radius: 1rem;
+            cursor: pointer;
+            border-width: 1px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            color: #ffffff;
+            font-weight: 600;
+            backdrop-filter: blur(5px);
+        }
+
+        .menu-card:hover {
+            transform: translateY(-4px) scale(1.02); 
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.7); 
+        }
+        
+        .menu-card.main-color {
+            background-color: rgba(5, 150, 105, 0.3); 
+            border-color: rgba(5, 150, 105, 0.6);
+        }
+        .menu-card.main-color:hover {
+            background-color: rgba(5, 150, 105, 0.5);
+        }
+
+        .menu-card.menu-color {
+            background-color: rgba(6, 182, 212, 0.3); 
+            border-color: rgba(6, 182, 212, 0.6);
+        }
+        .menu-card.menu-color:hover {
+            background-color: rgba(6, 182, 212, 0.5);
+        }
+        
+        .menu-card-icon {
+            color: #a7f3d0; 
+            margin-bottom: 0.75rem; 
+        }
+        
+        .menu-card-title {
+            font-size: 1.125rem; 
+            line-height: 1.75rem; 
+            letter-spacing: 0.025em; 
         }
 
         .glass-circle {
@@ -441,31 +490,38 @@
                 </h1>
             </header>
             
-            <div id="menu-selection" class="flex flex-col space-y-4 mb-6 w-full max-w-sm sm:max-w-md fade-in-up">
-                 <button 
+            <div id="menu-selection" class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6 w-full max-w-md sm:max-w-none fade-in-up">
+                 
+                 <div 
                     id="menu-barcode-modis" 
                     onclick="selectMenu('barcode-modis')"
-                    class="w-full glass-button-base glass-main-button flex items-center justify-center space-x-3 text-lg"
+                    class="menu-card main-color"
                     >
-                    <i data-lucide="scan" class="h-6 w-6"></i>
-                    <span>CARI BARCODE / MODIS</span>
-                </button>
-                 <button 
+                    <i data-lucide="scan" class="h-8 w-8 menu-card-icon text-lime-400"></i>
+                    <span class="menu-card-title">CARI BARCODE / MODIS</span>
+                    <p class="text-sm font-normal text-gray-300 mt-1">PLU, Nama, Barcode, Modis</p>
+                </div>
+                 
+                 <div 
                     id="menu-harga-promo" 
                     onclick="selectMenu('harga-promo')"
-                    class="w-full glass-button-base glass-menu-button flex items-center justify-center space-x-3 text-lg"
+                    class="menu-card menu-color"
                     >
-                    <i data-lucide="tag" class="h-6 w-6"></i>
-                    <span>CARI HARGA / PROMOSI</span>
-                </button>
-                 <button 
+                    <i data-lucide="tag" class="h-8 w-8 menu-card-icon text-cyan-300"></i>
+                    <span class="menu-card-title">CEK HARGA / PROMOSI</span>
+                    <p class="text-sm font-normal text-gray-300 mt-1">Harga Normal & Promo Aktif</p>
+                </div>
+                 
+                 <div 
                     id="menu-scan-itt" 
                     onclick="selectMenu('scan-itt')"
-                    class="w-full glass-button-base glass-main-button flex items-center justify-center space-x-3 text-lg"
+                    class="menu-card main-color"
                     >
-                    <i data-lucide="laptop-2" class="h-6 w-6"></i>
-                    <span>SCAN ITT WDCP / PDA</span>
-                </button>
+                    <i data-lucide="laptop-2" class="h-8 w-8 menu-card-icon text-lime-400"></i>
+                    <span class="menu-card-title">SCAN ITT WDCP / PDA</span>
+                    <p class="text-sm font-normal text-gray-300 mt-1">Tampilkan Barcode atau QRcode PLU</p>
+                </div>
+                
             </div>
             
             <div id="content-area" class="w-full flex flex-col items-center max-w-lg">
@@ -705,7 +761,7 @@
                 menuSelectionDiv.classList.add('hidden');
                 menuSelectionDiv.classList.remove('fade-out-down', 'fade-in-up');
                 
-                document.querySelectorAll('.glass-main-button, .glass-menu-button').forEach(btn => btn.classList.remove('active'));
+                document.querySelectorAll('.menu-card').forEach(btn => btn.classList.remove('active'));
                 const activeBtn = document.getElementById(`menu-${menu}`);
                 if (activeBtn) activeBtn.classList.add('active');
                 
@@ -822,7 +878,7 @@
                 menuSelectionDiv.classList.add('fade-in-up');
                 mainContainer.classList.add('menu-active'); 
                 
-                document.querySelectorAll('.glass-main-button, .glass-menu-button').forEach(btn => btn.classList.remove('active'));
+                document.querySelectorAll('.menu-card').forEach(btn => btn.classList.remove('active'));
                 
                 searchInput.focus();
             }, 300);
