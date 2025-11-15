@@ -399,7 +399,7 @@
              transition: all 0.5s ease-in-out; 
         }
         #main-container.menu-active {
-             justify-content: center;
+             
         }
         
         #main-footer {
@@ -483,7 +483,7 @@
 
     <div class="w-full max-w-xl lg:max-w-3xl flex flex-col items-center flex-grow pt-8 pb-12">
     
-        <div id="main-container" class="w-full px-4 sm:px-8 z-10 relative flex flex-col items-center flex-grow menu-active"> 
+        <div id="main-container" class="w-full px-4 sm:px-8 z-10 relative flex flex-col items-center flex-grow"> 
             <header class="text-center py-4 md:py-6 mb-2"> 
                 <h1 class="header-title text-4xl sm:text-5xl font-extrabold tracking-tight" id="main-header-title">
                  ~ MAIN MENU ~
@@ -876,7 +876,7 @@
                 currentMenu = null;
                 menuSelectionDiv.classList.remove('hidden');
                 menuSelectionDiv.classList.add('fade-in-up');
-                mainContainer.classList.add('menu-active'); 
+                mainContainer.classList.remove('menu-active'); 
                 
                 document.querySelectorAll('.menu-card').forEach(btn => btn.classList.remove('active'));
                 
